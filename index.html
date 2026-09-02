@@ -1309,11 +1309,12 @@ function describeSection(sectionKey){
    my ставим, когда ведём в личный кабинет; для корпоративного сайта ничего.
    Название раздела наследуем из целевой страницы и убираем дефисы. */
 
-// домен для назначения берём из справочника: какой чаще используется
-function domainFor(placement){
+// домен редиректа зависит и от назначения, и от ресурса: например mynpb.nl
+// («На сайте и лендинге») обслуживает только личный кабинет, сайта там нет
+function domainFor(placement, resource){
   const count = {};
   ROWS.forEach(row => {
-    if(row.placement !== placement || row.direct) return;
+    if(row.placement !== placement || row.resource !== resource || row.direct) return;
     const host = row.url.replace(/^https?:\/\//i, "").split("/")[0];
     count[host] = (count[host] || 0) + 1;
   });
@@ -1376,8 +1377,12 @@ function slugFromSection(sectionKey, resource){
 }
 
 function buildRedirect(sectionKey){
-  const domain = domainFor(reqPlacement.value);
-  if(!domain) return "";
+  const domain = domainFor(reqPlacement.value, reqResource.value);
+  if(!domain){
+    return { url: "", reason: "Для сочетания «" + RESOURCES[reqResource.value] + "» и «" +
+      PLACEMENTS[reqPlacement.value] + "» редиректных ссылок в справочнике нет — " +
+      "проверьте назначение." };
+  }
 
   const isHome = sectionKey === "glavnaya-stranica";
   const target = reqTarget.value.trim();
@@ -1386,14 +1391,14 @@ function buildRedirect(sectionKey){
   // у главной раздела нет: получается /ru и /myru, как в таблице
   if(!slug){
     if(isHome && target){
-      return "https://" + domain + "/" +
-             (reqResource.value === "lk" ? "my" + reqLocale.value : reqLocale.value);
+      return { url: "https://" + domain + "/" +
+        (reqResource.value === "lk" ? "my" + reqLocale.value : reqLocale.value), reason: "" };
     }
-    return "";
+    return { url: "", reason: "Укажите целевую страницу — ссылка соберётся сама" };
   }
 
-  return "https://" + domain + "/" + reqLocale.value + "-" +
-         (reqResource.value === "lk" ? "my" : "") + slug;
+  return { url: "https://" + domain + "/" + reqLocale.value + "-" +
+    (reqResource.value === "lk" ? "my" : "") + slug, reason: "" };
 }
 
 function findExact(){
@@ -1463,13 +1468,14 @@ function updateRequest(){
     if(reqTarget.value !== suggested) reqTarget.value = suggested;
   }
 
-  const redirect = buildRedirect(sectionKey);
+  const built = buildRedirect(sectionKey);
+  const redirect = built.url;
   if(redirect){
     reqRedirect.className = "rule-box";
     reqRedirect.textContent = redirect;
   }else{
     reqRedirect.className = "rule-box empty";
-    reqRedirect.textContent = "Укажите целевую страницу — ссылка соберётся сама";
+    reqRedirect.textContent = built.reason;
   }
 
   const lines = [

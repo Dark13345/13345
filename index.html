@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Easy Redirect Link</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Cpath%20d%3D%22M17.3559%2023.4679C16.8175%2023.1955%2016.2229%2023.0536%2015.6199%2023.0536C15.0168%2023.0536%2014.4222%2023.1955%2013.8838%2023.4679L10.2309%2025.585C9.2671%2026.1385%208.49364%2025.6841%208.49364%2024.5796V10.4726C8.49364%209.36807%207.71295%208.91371%206.75877%209.46716L1.73487%2012.3674C1.22976%2012.698%200.809455%2013.1435%200.508035%2013.6675C0.206615%2014.1915%200.0325653%2014.7795%200%2015.3836V29.4786C0.0338872%2030.0824%200.208498%2030.6698%200.5098%2031.1936C0.811101%2031.7175%201.2307%2032.1631%201.73487%2032.4948L13.9585%2039.5858C14.4969%2039.8582%2015.0915%2040%2015.6946%2040C16.2976%2040%2016.8922%2039.8582%2017.4306%2039.5858L29.5651%2032.5455C30.5289%2031.9921%2030.5289%2031.0954%2029.5651%2030.5347L17.3559%2023.4679Z%22%20fill%3D%22%23009B7A%22%2F%3E%3Cpath%20d%3D%22M22.4495%2016.5388C22.9879%2016.8112%2023.5825%2016.953%2024.1855%2016.953C24.7886%2016.953%2025.3832%2016.8112%2025.9216%2016.5388L29.5769%2014.4241C30.5407%2013.8706%2031.3118%2014.3225%2031.3118%2015.4295V29.5341C31.3118%2030.641%2032.0949%2031.093%2033.049%2030.5395L38.0729%2027.6393C38.5771%2027.3076%2038.9967%2026.862%2039.298%2026.3382C39.5993%2025.8143%2039.7739%2025.2269%2039.8078%2024.6231V10.5305C39.774%209.92609%2039.5992%209.33805%2039.2975%208.81375C38.9957%208.28945%2038.5755%207.84353%2038.0705%207.5119L25.8373%200.413652C25.2992%200.141673%2024.705%200%2024.1024%200C23.4998%200%2022.9057%200.141673%2022.3675%200.413652L10.2307%207.45148C9.26686%208.00493%209.26686%208.90158%2010.2307%209.4647L22.4495%2016.5388Z%22%20fill%3D%22%23F58426%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
@@ -32,7 +33,7 @@
     --step-1: 13px;
     --step-0: 15px;
     --step-1u: 18px;
-    --step-2u: 32px;
+    --step-2u: 24px;
 
     --radius: 8px;
     --radius-lg: 14px;
@@ -63,17 +64,20 @@
   }
 
   .head{
-    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--line);
   }
 
-  .brand{
-    display: inline-flex;
-    margin-bottom: 18px;
-  }
+  .brand{ display: inline-flex; }
 
   .brand svg{
     display: block;
-    height: 34px;
+    height: 30px;
     width: auto;
   }
 
@@ -83,9 +87,10 @@
     font-weight: 800;
     letter-spacing: -0.02em;
     margin: 0;
-    line-height: 1.2;
+    padding-left: 16px;
+    border-left: 1px solid var(--line-strong);
+    line-height: 1.25;
     color: var(--ink);
-    text-wrap: balance;
   }
 
   .hidden{ display: none !important; }
@@ -147,8 +152,8 @@
   /* Локали — плитка кнопок: так сотрудник ищет свой код глазами, а не в списке */
   .locale-grid{
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
   }
 
   .locale-opt{ position: relative; display:block; }
@@ -167,8 +172,8 @@
     flex-direction: column;
     align-items:center;
     justify-content:center;
-    gap: 2px;
-    padding: 11px 6px;
+    gap: 1px;
+    padding: 7px 6px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius);
     background: var(--surface);
@@ -176,15 +181,17 @@
   }
 
   .locale-opt .code{
-    font-size: var(--step-1u);
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.01em;
+    line-height: 1.3;
     color: var(--ink);
   }
 
   .locale-opt .caption{
-    font-size: var(--step-1);
+    font-size: 11.5px;
     font-weight: 400;
+    line-height: 1.3;
     color: var(--ink-3);
   }
 
@@ -338,14 +345,13 @@
 
   @media (max-width: 560px){
     body{ padding: 32px 16px 56px; }
-    .head{ margin-bottom: 22px; }
-    .brand{ margin-bottom: 14px; }
-    .brand svg{ height: 28px; }
-    h1{ font-size: 26px; }
+    .head{ gap: 12px; padding-bottom: 14px; margin-bottom: 20px; }
+    .brand svg{ height: 26px; }
+    h1{ font-size: 20px; padding-left: 12px; }
     .card{ padding: 20px 18px; }
-    .locale-grid{ grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 7px; }
-    .locale-opt .box{ padding: 10px 4px; }
-    .locale-opt .caption{ font-size: 11.5px; }
+    .locale-grid{ grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 6px; }
+    .locale-opt .box{ padding: 7px 4px; }
+    .locale-opt .caption{ font-size: 11px; }
     .result-label-row{ flex-direction: column; align-items: flex-start; gap: 3px; }
     .result-status{ text-align: left; }
     .result-row{ flex-direction: column; }

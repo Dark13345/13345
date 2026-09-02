@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Редиректные ссылки — подбор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg: #0B1220;
+    --bg-grid: #0E1626;
+    --card: #121B2E;
+    --card-2: #16213A;
+    --border: #223252;
+    --border-soft: #1B2740;
+    --text: #E7ECF6;
+    --text-dim: #8FA0BF;
+    --text-faint: #4A5A7D;
+    --accent: #35D6B5;
+    --accent-soft: rgba(53,214,181,0.12);
+    --danger: #F2637B;
+    --danger-soft: rgba(242,99,123,0.10);
+
+    --step-1: 12.5px;
+    --step-0: 14.5px;
+    --step-1u: 17px;
+    --step-2u: 28px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(53,214,181,0.07), transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(53,214,181,0.05), transparent 45%),
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+    background-size: auto, auto, 42px 42px, 42px 42px;
+    display:flex;
+    justify-content:center;
+    padding: 56px 20px 80px;
+  }
+
+  .wrap{
+    width: 100%;
+    max-width: 660px;
+  }
+
+  h1{
+    font-size: var(--step-2u);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 26px;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+
+  [hidden]{ display: none !important; }
+
+  .card{
+    background: linear-gradient(180deg, var(--card), var(--card-2));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+
+  .fields{
+    display: grid;
+    gap: 22px;
+  }
+
+  .field.is-locked{
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  label{
+    display:block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 9px;
+  }
+
+  select{
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #0E1626;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: var(--step-0);
+    font-weight: 500;
+    padding: 13px 40px 13px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238FA0BF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select:hover{ border-color: #2E4269; }
+
+  select:focus{
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  select option{ background: #0E1626; color: var(--text); }
+
+  /* Локали — плитка кнопок: так сотрудник ищет свой код глазами, а не в списке */
+  .locale-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 8px;
+  }
+
+  .locale-opt{ position: relative; display:block; }
+
+  .locale-opt input{
+    position:absolute;
+    opacity:0;
+    width:100%;
+    height:100%;
+    margin:0;
+    cursor:pointer;
+  }
+
+  .locale-opt .box{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    gap: 3px;
+    padding: 11px 6px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #0E1626;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .locale-opt .code{
+    font-size: var(--step-1u);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .locale-opt .caption{
+    font-size: var(--step-1);
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .locale-opt input:checked + .box .caption{ color: var(--text); }
+
+  .locale-opt input:hover + .box{ border-color: #2E4269; }
+
+  .locale-opt input:checked + .box{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+
+  .locale-opt input:focus-visible + .box{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .locale-opt input:disabled + .box{
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .generate-btn{
+    width: 100%;
+    margin-top: 26px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #06231D;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+  }
+
+  .generate-btn:hover:not(:disabled){ background: #4CE3C4; }
+  .generate-btn:active:not(:disabled){ transform: scale(0.99); }
+  .generate-btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+
+  .divider{
+    height: 1px;
+    background: var(--border-soft);
+    margin: 26px 0 22px;
+  }
+
+  .result-label-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+  }
+
+  .result-label-row label{ margin-bottom: 0; }
+
+  .result-status{
+    font-size: 12px;
+    color: var(--text-faint);
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .result-row{
+    display:flex;
+    gap: 8px;
+  }
+
+  .result-box{
+    flex: 1;
+    min-width: 0;
+    background: #0A101C;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  .result-box.empty{
+    color: var(--text-faint);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: var(--step-0);
+    white-space: normal;
+  }
+
+  .result-box.error{
+    color: var(--danger);
+    border-color: rgba(242,99,123,0.4);
+    background: var(--danger-soft);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: var(--step-0);
+    white-space: normal;
+  }
+
+  .result-box::-webkit-scrollbar{ height: 5px; }
+  .result-box::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 4px; }
+
+  .copy-btn{
+    flex-shrink: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 7px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #0E1626;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .copy-btn:hover:not(:disabled){ border-color: var(--accent); color: var(--accent); }
+  .copy-btn:disabled{ cursor: not-allowed; opacity: 0.45; }
+
+  .copy-btn.copied{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .copy-btn svg{ flex-shrink:0; }
+
+  .note{
+    margin-top: 14px;
+    font-size: var(--step-1);
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  .hidden{ display: none !important; }
+
+
+  @media (max-width: 560px){
+    body{ padding: 32px 16px 56px; }
+    .locale-grid{ grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 7px; }
+    .locale-opt .box{ padding: 10px 4px; }
+    .locale-opt .caption{ font-size: 11px; }
+    h1{ font-size: 23px; }
+    .card{ padding: 20px 18px; border-radius: 14px; }
+    .result-row{ flex-direction: column; }
+    .copy-btn{ padding: 13px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Редиректная ссылка за четыре шага</h1>
+
+  <div class="card">
+
+    <div class="fields">
+
+      <div class="field" id="fieldResource">
+        <label for="resource">Ресурс</label>
+        <select id="resource"></select>
+      </div>
+
+      <div class="field" id="fieldSection">
+        <label for="section">Раздел</label>
+        <select id="section"></select>
+      </div>
+
+      <div class="field" id="fieldLocale">
+        <label>Локаль клиента</label>
+        <div class="locale-grid" id="localeGrid"></div>
+      </div>
+
+      <div class="field" id="fieldPlacement">
+        <label for="placement">Где будете вставлять ссылку</label>
+        <select id="placement"></select>
+      </div>
+
+    </div>
+
+    <button class="generate-btn" id="generateBtn">Получить ссылку</button>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <div class="result-label-row">
+        <label for="resultBox">Ссылка</label>
+        <span class="result-status" id="resultStatus">Ещё не получена</span>
+      </div>
+      <div class="result-row">
+        <div class="result-box empty" id="resultBox">Заполните четыре поля выше и нажмите «Получить ссылку»</div>
+        <button class="copy-btn" id="copyBtn" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span id="copyLabel">Скопировать</span>
+        </button>
+      </div>
+      <p class="note hidden" id="resultNote"></p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   СПРАВОЧНИК ССЫЛОК
+   Ниже — единственное место, которое нужно править при
+   обновлении таблицы. Всё остальное трогать не нужно.
+
+   Каждая строка = одна ссылка:
+     resource  — ресурс: "lk" (личный кабинет) или "site" (корп. сайт)
+     section   — раздел, ключ из списка SECTIONS ниже
+     locale    — "ru", "en" или список сразу нескольких локалей
+     placement — место вставки, ключ из списка PLACEMENTS ниже
+     direct    — true, если это прямая ссылка, а не редиректная
+     url       — сам адрес
+     note      — необязательная подсказка, показывается под ссылкой
+   ============================================================ */
+
+const RESOURCES = {
+  lk:   "Личный кабинет",
+  site: "Корпоративный сайт"
+};
+
+const SECTIONS = {
+  "glavnaya-stranica":         "Главная страница",
+  "registraciya":              "Регистрация",
+  "vosstanovlenie-parolya":    "Восстановление пароля",
+  "popolnit-schet":            "Пополнить счёт",
+  "vyvod-sredstv":             "Вывод средств",
+  "torgovye-platformy":        "Торговые платформы",
+  "torgovyy-schet-master":     "Торговый счёт Master",
+  "torgovyy-schet-zero":       "Торговый счёт Zero",
+  "torgovyy-schet-expert":     "Торговый счёт Expert",
+  "torgovyy-schet-vip":        "Торговый счёт VIP",
+  "uchebnyy-schet-demo":       "Учебный счёт Demo",
+  "uchebnyy-schet-cent":       "Учебный счёт Cent",
+  "promoakcii":                "Промоакции",
+  "konkursy":                  "Конкурсы",
+  "cashback":                  "Cashback",
+  "bitva-treyderov":           "Битва Трейдеров",
+  "akciya-30-let":             "Акция «30 лет»",
+  "analiticheskiy-portal":     "Аналитический портал",
+  "referalnye-ssylki-i-promo": "Реферальные ссылки и промо"
+};
+
+const PLACEMENTS = {
+  email:     "Для содержимого email писем",
+  landing:   "Внутри корпоративного сайта и лендингов",
+  media:     "Для использования командой медиабаинга на лендингах и чат-ботах"
+};
+
+const LINKS = [
+// Для содержимого email писем — корпоративный сайт
+  { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/en" },
+  { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru" },
+  { resource:"site", section:"cashback",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-cashback" },
+  { resource:"site", section:"bitva-treyderov",           locale:"en",                              placement:"email", url:"https://npb-markets.global/tbden" },
+  { resource:"site", section:"bitva-treyderov",           locale:"ru",                              placement:"email", url:"https://npb-markets.global/tbdru" },
+  { resource:"site", section:"akciya-30-let",             locale:"ru",                              placement:"email", url:"https://npb-markets.global/30yearsru" },
+
+  // Для содержимого email писем — личный кабинет
+  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/myen" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/myru" },
+  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myrecovery_password" },
+  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myrecovery_password" },
+  { resource:"lk", section:"popolnit-schet",            locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mydeposit" },
+  { resource:"lk", section:"popolnit-schet",            locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mydeposit" },
+  { resource:"lk", section:"torgovye-platformy",        locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myplatforms" },
+  { resource:"lk", section:"torgovye-platformy",        locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myplatforms" },
+  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"email", url:"https://npb-markets.global/mypromoen" },
+  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"email", url:"https://npb-markets.global/mypromoru" },
+  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mycontests" },
+  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mycontests" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"email", url:"https://npb-markets.global/porusupportanalytic" },
+
+  // Внутри корпоративного сайта и лендингов — личный кабинет
+  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"landing", url:"https://mynpb.nl/lpen" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"landing", url:"https://mynpb.nl/lpru" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/login" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:["vn","id"],                       placement:"landing", direct:true, url:"https://my2.npbfxofficial.org/login" },
+  { resource:"lk", section:"registraciya",              locale:"en",                              placement:"landing", url:"https://mynpb.nl/lpenreg" },
+  { resource:"lk", section:"registraciya",              locale:"ru",                              placement:"landing", url:"https://mynpb.nl/lprureg" },
+  { resource:"lk", section:"registraciya",              locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/register" },
+  { resource:"lk", section:"registraciya",              locale:["vn","id"],                       placement:"landing", direct:true, url:"https://my2.npbfxofficial.org/register" },
+  { resource:"lk", section:"popolnit-schet",            locale:"en",                              placement:"landing", url:"https://mynpb.nl/en-mydeposit" },
+  { resource:"lk", section:"popolnit-schet",            locale:"ru",                              placement:"landing", url:"https://mynpb.nl/ru-mydeposit" },
+  { resource:"lk", section:"vyvod-sredstv",             locale:"en",                              placement:"landing", url:"https://mynpb.nl/en-mywithdraw" },
+  { resource:"lk", section:"vyvod-sredstv",             locale:"ru",                              placement:"landing", url:"https://mynpb.nl/ru-mywithdraw" },
+  { resource:"lk", section:"torgovyy-schet-master",     locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/master" },
+  { resource:"lk", section:"torgovyy-schet-zero",       locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/zero" },
+  { resource:"lk", section:"torgovyy-schet-expert",     locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/expert" },
+  { resource:"lk", section:"torgovyy-schet-vip",        locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/vip" },
+  { resource:"lk", section:"uchebnyy-schet-demo",       locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/demo-master" },
+  { resource:"lk", section:"uchebnyy-schet-cent",       locale:["ru","en"],                       placement:"landing", url:"https://mynpb.nl/trade-accounts/new/acc/standard-cent" },
+  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"landing", url:"https://mynpb.nl/personalenpromo" },
+  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"landing", url:"https://mynpb.nl/personalrupromo" },
+  { resource:"lk", section:"promoakcii",                locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/promotions" },
+  { resource:"lk", section:"promoakcii",                locale:["vn","id"],                       placement:"landing", direct:true, url:"https://my2.npbfxofficial.org/promotions" },
+  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"landing", url:"https://mynpb.nl/en-mycontests" },
+  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"landing", url:"https://mynpb.nl/ru-mycontests" },
+  { resource:"lk", section:"cashback",                  locale:"en",                              placement:"landing", url:"https://mynpb.nl/cashbackenreg" },
+  { resource:"lk", section:"cashback",                  locale:"ru",                              placement:"landing", url:"https://mynpb.nl/cashbackrureg" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"en",                              placement:"landing", url:"https://mynpb.nl/poensupportanalytic" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"landing", url:"https://mynpb.nl/porusupportanalytic" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/support/analytic" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:["vn","id"],                       placement:"landing", direct:true, url:"https://my2.npbfxofficial.org/support/analytic" },
+  { resource:"lk", section:"referalnye-ssylki-i-promo", locale:"en",                              placement:"landing", url:"https://mynpb.nl/poenaffiliatelinks" },
+  { resource:"lk", section:"referalnye-ssylki-i-promo", locale:"ru",                              placement:"landing", url:"https://mynpb.nl/poruaffiliatelinks" },
+  { resource:"lk", section:"referalnye-ssylki-i-promo", locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/affiliate/links" },
+  { resource:"lk", section:"referalnye-ssylki-i-promo", locale:["vn","id"],                       placement:"landing", direct:true, url:"https://my2.npbfxofficial.org/affiliate/links" },
+
+  // Для использования командой медиабаинга на лендингах и чат-ботах — личный кабинет
+  { resource:"lk", section:"registraciya",              locale:"en",                              placement:"media", url:"https://npbbroker.com/en-myregister" },
+  { resource:"lk", section:"registraciya",              locale:"ru",                              placement:"media", url:"https://npbbroker.com/ru-myregister" },
+];
+
+const LOCALES = [
+  { code:"ru", title:"RU", caption:"русский" },
+  { code:"en", title:"EN", caption:"английский" },
+  { code:"es", title:"ES", caption:"испанский" },
+  { code:"ms", title:"MS", caption:"малайский" },
+  { code:"ua", title:"UA", caption:"украинский" },
+  { code:"uz", title:"UZ", caption:"узбекский" },
+  { code:"ar", title:"AR", caption:"арабский" },
+  { code:"fa", title:"FA", caption:"фарси" },
+  { code:"vn", title:"VN", caption:"вьетнамский" },
+  { code:"id", title:"ID", caption:"индонезийский" }
+];
+
+// Строки со списком локалей разворачиваем в записи по одной локали
+const ROWS = [];
+LINKS.forEach(row => {
+  const list = Array.isArray(row.locale) ? row.locale : [row.locale];
+  list.forEach(code => ROWS.push(Object.assign({}, row, { locale: code })));
+});
+
+/* ============================================================
+   Дальше — механика. Правится редко.
+   ============================================================ */
+
+const STORAGE_KEY = "redirect-picker-last-choice";
+
+
+
+const resourceSelect  = document.getElementById("resource");
+const sectionSelect   = document.getElementById("section");
+const placementSelect = document.getElementById("placement");
+const localeGrid      = document.getElementById("localeGrid");
+
+const fieldSection   = document.getElementById("fieldSection");
+const fieldLocale    = document.getElementById("fieldLocale");
+const fieldPlacement = document.getElementById("fieldPlacement");
+
+const generateBtn  = document.getElementById("generateBtn");
+const resultBox    = document.getElementById("resultBox");
+const resultStatus = document.getElementById("resultStatus");
+const resultNote   = document.getElementById("resultNote");
+const copyBtn      = document.getElementById("copyBtn");
+const copyLabel    = document.getElementById("copyLabel");
+
+let currentLink = "";
+
+// Локаль сейчас выбрана какая
+function selectedLocale(){
+  const checked = localeGrid.querySelector('input[name="locale"]:checked');
+  return checked ? checked.value : "";
+}
+
+// Уникальные значения поля среди строк, подходящих под уже сделанный выбор
+function optionsFor(field, filter){
+  const seen = [];
+  ROWS.forEach(row => {
+    const fits = Object.keys(filter).every(key => !filter[key] || row[key] === filter[key]);
+    if(fits && !seen.includes(row[field])) seen.push(row[field]);
+  });
+  return seen;
+}
+
+function fillSelect(select, keys, dictionary, keepValue){
+  const previous = keepValue ? select.value : "";
+  select.innerHTML = "";
+  // порядок в списке — как в словаре подписей, а не как строки идут в справочнике
+  const order = Object.keys(dictionary);
+  const sorted = keys.slice().sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  sorted.forEach(key => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = dictionary[key] || key;
+    select.appendChild(option);
+  });
+  if(previous && keys.includes(previous)) select.value = previous;
+}
+
+// Каждое следующее поле показывает только то, что реально есть в справочнике
+function refreshChain(){
+  const resource = resourceSelect.value;
+
+  const sectionKeys = optionsFor("section", { resource });
+  fillSelect(sectionSelect, sectionKeys, SECTIONS, true);
+  const section = sectionSelect.value;
+
+  const localeKeys = optionsFor("locale", { resource, section });
+  let localeStillAvailable = false;
+  localeGrid.querySelectorAll('input[name="locale"]').forEach(input => {
+    const available = localeKeys.includes(input.value);
+    input.disabled = !available;
+    if(!available && input.checked) input.checked = false;
+    if(available && input.checked) localeStillAvailable = true;
+  });
+  if(!localeStillAvailable){
+    const first = localeGrid.querySelector('input[name="locale"]:not(:disabled)');
+    if(first) first.checked = true;
+  }
+  const locale = selectedLocale();
+
+  const placementKeys = optionsFor("placement", { resource, section, locale });
+  fillSelect(placementSelect, placementKeys, PLACEMENTS, true);
+
+  fieldSection.classList.toggle("is-locked", sectionKeys.length === 0);
+  fieldLocale.classList.toggle("is-locked", localeKeys.length === 0);
+  fieldPlacement.classList.toggle("is-locked", placementKeys.length === 0);
+  generateBtn.disabled = placementKeys.length === 0;
+
+  resetResult();
+}
+
+function resetResult(){
+  currentLink = "";
+  resultBox.textContent = "Заполните четыре поля выше и нажмите «Получить ссылку»";
+  resultBox.className = "result-box empty";
+  resultStatus.textContent = "Ещё не получена";
+  resultNote.classList.add("hidden");
+  copyBtn.disabled = true;
+  copyBtn.classList.remove("copied");
+  copyLabel.textContent = "Скопировать";
+}
+
+function findLink(){
+  const resource  = resourceSelect.value;
+  const section   = sectionSelect.value;
+  const locale    = selectedLocale();
+  const placement = placementSelect.value;
+  return ROWS.find(row =>
+    row.resource === resource &&
+    row.section === section &&
+    row.locale === locale &&
+    row.placement === placement
+  );
+}
+
+function rememberChoice(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      resource: resourceSelect.value,
+      section: sectionSelect.value,
+      locale: selectedLocale(),
+      placement: placementSelect.value
+    }));
+  }catch(e){ /* приватный режим — просто не запоминаем */ }
+}
+
+function restoreChoice(){
+  let saved = null;
+  try{
+    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+  }catch(e){ saved = null; }
+  if(!saved) return;
+
+  if(saved.resource && RESOURCES[saved.resource]) resourceSelect.value = saved.resource;
+  refreshChain();
+  if(saved.section && sectionSelect.querySelector(`option[value="${saved.section}"]`)){
+    sectionSelect.value = saved.section;
+    refreshChain();
+  }
+  const localeInput = localeGrid.querySelector(`input[value="${saved.locale}"]:not(:disabled)`);
+  if(localeInput){
+    localeInput.checked = true;
+    refreshChain();
+  }
+  if(saved.placement && placementSelect.querySelector(`option[value="${saved.placement}"]`)){
+    placementSelect.value = saved.placement;
+  }
+}
+
+// --- сборка полей: вызывается один раз, когда справочник расшифрован ---
+
+function buildFields(){
+  fillSelect(resourceSelect, optionsFor("resource", {}), RESOURCES, false);
+
+  localeGrid.innerHTML = "";
+  LOCALES.forEach((loc, index) => {
+    const wrap = document.createElement("label");
+    wrap.className = "locale-opt";
+    wrap.innerHTML =
+      '<input type="radio" name="locale" value="' + loc.code + '"' + (index === 0 ? " checked" : "") + '>' +
+      '<span class="box">' +
+        '<span class="code">' + loc.title + '</span>' +
+        '<span class="caption">' + loc.caption + '</span>' +
+      '</span>';
+    localeGrid.appendChild(wrap);
+  });
+
+  resourceSelect.addEventListener("change", refreshChain);
+  sectionSelect.addEventListener("change", refreshChain);
+  localeGrid.addEventListener("change", refreshChain);
+  placementSelect.addEventListener("change", resetResult);
+
+  refreshChain();
+  restoreChoice();
+}
+
+generateBtn.addEventListener("click", () => {
+  const row = findLink();
+
+  if(!row){
+    currentLink = "";
+    resultBox.textContent = "Для такой комбинации ссылки в справочнике нет. Проверьте выбор или запросите ссылку у ответственного за таблицу.";
+    resultBox.className = "result-box error";
+    resultStatus.textContent = "Не найдено";
+    resultNote.classList.add("hidden");
+    copyBtn.disabled = true;
+    return;
+  }
+
+  currentLink = row.url;
+  resultBox.textContent = row.url;
+  resultBox.className = "result-box";
+  resultStatus.textContent = RESOURCES[row.resource] + " · " + SECTIONS[row.section] +
+    " · " + row.locale.toUpperCase() + (row.direct ? " · прямая" : "");
+  copyBtn.disabled = false;
+  copyBtn.classList.remove("copied");
+  copyLabel.textContent = "Скопировать";
+
+  const notes = [];
+  if(row.direct){
+    notes.push("Это прямая ссылка: на локали " + row.locale.toUpperCase() +
+               " сайт не блокируется, редирект не нужен.");
+  }
+  if(row.note) notes.push(row.note);
+
+  if(notes.length){
+    resultNote.textContent = notes.join(" ");
+    resultNote.classList.remove("hidden");
+  }else{
+    resultNote.classList.add("hidden");
+  }
+
+  rememberChoice();
+});
+
+copyBtn.addEventListener("click", async () => {
+  if(!currentLink) return;
+  try{
+    await navigator.clipboard.writeText(currentLink);
+  }catch(e){
+    // старые браузеры и страницы без https
+    const ta = document.createElement("textarea");
+    ta.value = currentLink;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+  copyBtn.classList.add("copied");
+  copyLabel.textContent = "Скопировано";
+  setTimeout(() => {
+    copyBtn.classList.remove("copied");
+    copyLabel.textContent = "Скопировать";
+  }, 1800);
+});
+
+buildFields();
+</script>
+
+</body>
+</html>

@@ -759,6 +759,7 @@
      placement — место вставки, ключ из списка PLACEMENTS ниже
      direct    — true, если это прямая ссылка, а не редиректная
      url       — сам адрес
+     target    — целевая страница: куда ведёт редирект (колонки «Целевая стр»)
      note      — необязательная подсказка, показывается под ссылкой
    ============================================================ */
 
@@ -815,27 +816,27 @@ const PLACEMENTS = {
 
 const LINKS = [
 // В email-рассылке — корпоративный сайт
-  { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru" },
-  { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/en" },
-  { resource:"site", section:"cashback",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-cashback" },
-  { resource:"site", section:"bitva-treyderov",           locale:"ru",                              placement:"email", url:"https://npb-markets.global/tbdru" },
-  { resource:"site", section:"bitva-treyderov",           locale:"en",                              placement:"email", url:"https://npb-markets.global/tbden" },
-  { resource:"site", section:"akciya-30-let",             locale:"ru",                              placement:"email", url:"https://npb-markets.global/30yearsru" },
+  { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru", target:"https://ru.npbmarkets.online/" },
+  { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/en", target:"https://en.npbmarkets.online/" },
+  { resource:"site", section:"cashback",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-cashback", target:"https://ru.npbmarkets.online/cashback" },
+  { resource:"site", section:"bitva-treyderov",           locale:"ru",                              placement:"email", url:"https://npb-markets.global/tbdru", target:"https://ru.npbmarkets.online/trading-battle-demo" },
+  { resource:"site", section:"bitva-treyderov",           locale:"en",                              placement:"email", url:"https://npb-markets.global/tbden", target:"https://en.npbmarkets.online/trading-battle-demo" },
+  { resource:"site", section:"akciya-30-let",             locale:"ru",                              placement:"email", url:"https://npb-markets.global/30yearsru", target:"https://ru.npbmarkets.online/30-years" },
 
   // В email-рассылке — личный кабинет
-  { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/myru" },
-  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/myen" },
-  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myrecovery_password" },
-  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myrecovery_password" },
-  { resource:"lk", section:"popolnit-schet",            locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mydeposit" },
-  { resource:"lk", section:"popolnit-schet",            locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mydeposit" },
-  { resource:"lk", section:"torgovye-platformy",        locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myplatforms" },
-  { resource:"lk", section:"torgovye-platformy",        locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myplatforms" },
-  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"email", url:"https://npb-markets.global/mypromoru" },
-  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"email", url:"https://npb-markets.global/mypromoen" },
-  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mycontests" },
-  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mycontests" },
-  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"email", url:"https://npb-markets.global/porusupportanalytic" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/myru", target:"http://my1.npbaccount.org/" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/myen", target:"http://my1.npbaccount.org/" },
+  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myrecovery_password", target:"https://my1.npbaccount.org/recovery_password" },
+  { resource:"lk", section:"vosstanovlenie-parolya",    locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myrecovery_password", target:"https://my1.npbaccount.org/recovery_password" },
+  { resource:"lk", section:"popolnit-schet",            locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mydeposit", target:"https://my1.npbaccount.org/billing/deposit" },
+  { resource:"lk", section:"popolnit-schet",            locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mydeposit", target:"https://my1.npbaccount.org/billing/deposit" },
+  { resource:"lk", section:"torgovye-platformy",        locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-myplatforms", target:"https://my1.npbaccount.org/support/platforms" },
+  { resource:"lk", section:"torgovye-platformy",        locale:"en",                              placement:"email", url:"https://npb-markets.global/en-myplatforms", target:"https://my1.npbaccount.org/support/platforms" },
+  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"email", url:"https://npb-markets.global/mypromoru", target:"http://my1.npbaccount.org/promotions" },
+  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"email", url:"https://npb-markets.global/mypromoen", target:"http://my1.npbaccount.org/promotions" },
+  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru-mycontests", target:"https://my1.npbaccount.org/contests" },
+  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mycontests", target:"https://my1.npbaccount.org/contests" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"email", url:"https://npb-markets.global/porusupportanalytic", target:"https://npbfx.clawshorns.com/" },
 
   // На сайте и лендинге — личный кабинет
   { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"landing", url:"https://mynpb.nl/lpru" },
@@ -878,43 +879,43 @@ const LINKS = [
   { resource:"lk", section:"registraciya",              locale:"en",                              placement:"media", url:"https://npbbroker.com/en-myregister" },
 
   // Другое — корпоративный сайт
-  { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru" },
-  { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en" },
-  { resource:"site", section:"popolnit-schet",            locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-deposit" },
-  { resource:"site", section:"vyvod-sredstv",             locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-withdrawal" },
-  { resource:"site", section:"cashback",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-cashback" },
-  { resource:"site", section:"cashback",                  locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-cashback" },
-  { resource:"site", section:"bitva-treyderov",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/tbdru" },
-  { resource:"site", section:"bitva-treyderov",           locale:"en",                              placement:"other", url:"https://npb.markets-official.com/tbden" },
-  { resource:"site", section:"akciya-30-let",             locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-30years" },
-  { resource:"site", section:"podarki-za-sdelki",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-loyalty" },
-  { resource:"site", section:"analiticheskiy-portal",     locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-analytic" },
-  { resource:"site", section:"o-kompanii",                locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-about" },
-  { resource:"site", section:"kontakty",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-contacts" },
-  { resource:"site", section:"dokumenty",                 locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-documents" },
-  { resource:"site", section:"licenzii",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-regulation" },
-  { resource:"site", section:"partnerstvo",               locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-partnership" },
-  { resource:"site", section:"novosti",                   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-news" },
-  { resource:"site", section:"vebinary",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-webinars" },
-  { resource:"site", section:"torgovye-scheta",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-accounts" },
-  { resource:"site", section:"sravnenie-schetov",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-account-types" },
-  { resource:"site", section:"uchebnye-scheta",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-demo" },
-  { resource:"site", section:"populyarnye-instrumenty",   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-instruments" },
-  { resource:"site", section:"mt4",                       locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-mt4" },
-  { resource:"site", section:"stp-ndd",                   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-ndd" },
-  { resource:"site", section:"swap-free",                 locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-islamic" },
-  { resource:"site", section:"strahovanie-scheta",        locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-insurance" },
-  { resource:"site", section:"ubytok-na-schete",          locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-transfer" },
-  { resource:"site", section:"ubytok-na-schete",          locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-transfer" },
+  { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru", target:"https://ru.npbmarkets.online/" },
+  { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en", target:"https://en.npbmarkets.online/" },
+  { resource:"site", section:"popolnit-schet",            locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-deposit", target:"https://ru.npbmarkets.online/deposit-withdrawal" },
+  { resource:"site", section:"vyvod-sredstv",             locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-withdrawal", target:"https://ru.npbmarkets.online/deposit-withdrawal" },
+  { resource:"site", section:"cashback",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-cashback", target:"https://ru.npbmarkets.online/cashback" },
+  { resource:"site", section:"cashback",                  locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-cashback", target:"https://en.npbmarkets.online/cashback" },
+  { resource:"site", section:"bitva-treyderov",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/tbdru", target:"https://ru.npbmarkets.online/trading-battle-demo" },
+  { resource:"site", section:"bitva-treyderov",           locale:"en",                              placement:"other", url:"https://npb.markets-official.com/tbden", target:"https://en.npbmarkets.online/trading-battle-demo" },
+  { resource:"site", section:"akciya-30-let",             locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-30years", target:"https://ru.npbmarkets.online/30-years" },
+  { resource:"site", section:"podarki-za-sdelki",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-loyalty", target:"https://ru.npbmarkets.online/loyalty-program" },
+  { resource:"site", section:"analiticheskiy-portal",     locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-analytic", target:"https://ru.npbmarkets.online/analytical-portal" },
+  { resource:"site", section:"o-kompanii",                locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-about", target:"https://ru.npbmarkets.online/about" },
+  { resource:"site", section:"kontakty",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-contacts", target:"https://ru.npbmarkets.online/contacts" },
+  { resource:"site", section:"dokumenty",                 locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-documents", target:"https://ru.npbmarkets.online/documents" },
+  { resource:"site", section:"licenzii",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-regulation", target:"https://ru.npbmarkets.online/regulation" },
+  { resource:"site", section:"partnerstvo",               locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-partnership", target:"https://ru.npbmarkets.online/partnership" },
+  { resource:"site", section:"novosti",                   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-news", target:"https://ru.npbmarkets.online/news" },
+  { resource:"site", section:"vebinary",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-webinars", target:"https://ru.npbmarkets.online/webinars" },
+  { resource:"site", section:"torgovye-scheta",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-accounts", target:"https://ru.npbmarkets.online/trading-accounts" },
+  { resource:"site", section:"sravnenie-schetov",         locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-account-types", target:"https://ru.npbmarkets.online/account-types" },
+  { resource:"site", section:"uchebnye-scheta",           locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-demo", target:"https://ru.npbmarkets.online/demo-accounts" },
+  { resource:"site", section:"populyarnye-instrumenty",   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-instruments", target:"https://ru.npbmarkets.online/popular-instruments" },
+  { resource:"site", section:"mt4",                       locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-mt4", target:"https://ru.npbmarkets.online/metatrader4" },
+  { resource:"site", section:"stp-ndd",                   locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-ndd", target:"https://ru.npbmarkets.online/ndd-technology" },
+  { resource:"site", section:"swap-free",                 locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-islamic", target:"https://ru.npbmarkets.online/islamic-account" },
+  { resource:"site", section:"strahovanie-scheta",        locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-insurance", target:"https://ru.npbmarkets.online/insurance" },
+  { resource:"site", section:"ubytok-na-schete",          locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-transfer", target:"https://ru.npbmarkets.online/transfer-account" },
+  { resource:"site", section:"ubytok-na-schete",          locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-transfer", target:"https://en.npbmarkets.online/transfer-account" },
 
   // Другое — личный кабинет
-  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"other", url:"https://npb.markets-official.com/myen" },
-  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/mypromoru" },
-  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"other", url:"https://npb.markets-official.com/mypromoen" },
-  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-mycontests" },
-  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-mycontests" },
-  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/analytics-portal-ru" },
-  { resource:"lk", section:"analiticheskiy-portal",     locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-myanalyticsportal" },
+  { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"other", url:"https://npb.markets-official.com/myen", target:"http://my1.npbaccount.org/" },
+  { resource:"lk", section:"promoakcii",                locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/mypromoru", target:"http://my1.npbaccount.org/promotions" },
+  { resource:"lk", section:"promoakcii",                locale:"en",                              placement:"other", url:"https://npb.markets-official.com/mypromoen", target:"http://my1.npbaccount.org/promotions" },
+  { resource:"lk", section:"konkursy",                  locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-mycontests", target:"https://my1.npbaccount.org/contests" },
+  { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-mycontests", target:"https://my1.npbaccount.org/contests" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/analytics-portal-ru", target:"https://npbfx.clawshorns.com/" },
+  { resource:"lk", section:"analiticheskiy-portal",     locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-myanalyticsportal", target:"https://npbfx.clawshorns.com/" },
 ];
 
 const LOCALES = [
@@ -1185,6 +1186,7 @@ buildFields();
 
 const REDIRECT_LOCALES = ["ru", "en"];
 let localeNotice = "";
+let targetTouched = false;   // сотрудник правил целевую страницу вручную
 
 const askBtn        = document.getElementById("askBtn");
 const reqModal      = document.getElementById("reqModal");
@@ -1333,19 +1335,46 @@ function slugFromUrl(url){
   return slug;
 }
 
+// целевая страница из справочника: она зависит от раздела, ресурса и локали,
+// но не от того, где ссылку собираются использовать
+function targetFor(sectionKey, resource, locale){
+  if(!sectionKey) return "";
+  const exact = ROWS.find(row => row.section === sectionKey && row.resource === resource &&
+                                 row.locale === locale && row.target);
+  const byLocale = ROWS.find(row => row.section === sectionKey && row.locale === locale && row.target);
+  const any = ROWS.find(row => row.section === sectionKey && row.target);
+  const found = exact || byLocale || any;
+  return found ? found.target : "";
+}
+
 // если целевую страницу ещё не вписали — подсматриваем в уже готовые ссылки раздела
 function slugFromSection(sectionKey, resource){
   if(!sectionKey) return "";
-  const own = ROWS.find(row => row.section === sectionKey && row.resource === resource && !row.direct);
-  const any = ROWS.find(row => row.section === sectionKey && !row.direct);
-  const source = own || any;
-  return source ? slugFromUrl(source.url) : "";
+  const rows = ROWS.filter(row => row.section === sectionKey && !row.direct);
+  const source = rows.find(row => row.resource === resource) || rows[0];
+  if(!source) return "";
+  // берём хвост, только если ссылка собрана по правилам: /ru-mydeposit, /en-promo
+  const path = source.url.replace(/^https?:\/\//i, "").split("/").slice(1).join("/");
+  return /^(ru|en)[-_]/i.test(path) ? slugFromUrl(source.url) : "";
 }
 
 function buildRedirect(sectionKey){
   const domain = domainFor(reqPlacement.value);
-  const slug = slugFromUrl(reqTarget.value) || slugFromSection(sectionKey, reqResource.value);
-  if(!domain || !slug) return "";
+  if(!domain) return "";
+
+  const isHome = sectionKey === "glavnaya-stranica";
+  const target = reqTarget.value.trim();
+  const slug = slugFromUrl(target) || slugFromSection(sectionKey, reqResource.value);
+
+  // у главной раздела нет: получается /ru и /myru, как в таблице
+  if(!slug){
+    if(isHome && target){
+      return "https://" + domain + "/" +
+             (reqResource.value === "lk" ? "my" + reqLocale.value : reqLocale.value);
+    }
+    return "";
+  }
+
   return "https://" + domain + "/" + reqLocale.value + "-" +
          (reqResource.value === "lk" ? "my" : "") + slug;
 }
@@ -1412,6 +1441,11 @@ function updateRequest(){
       "<br><br>" + reqCheck.innerHTML;
   }
 
+  if(!targetTouched){
+    const suggested = targetFor(sectionKey, reqResource.value, reqLocale.value);
+    if(reqTarget.value !== suggested) reqTarget.value = suggested;
+  }
+
   const redirect = buildRedirect(sectionKey);
   if(redirect){
     reqRedirect.className = "rule-box";
@@ -1440,6 +1474,7 @@ function openRequest(){
   reqSection.value = SECTIONS[sectionSelect.value] || "";
   const locale = selectedLocale();
   localeNotice = "";
+  targetTouched = false;
   if(REDIRECT_LOCALES.includes(locale)){
     reqLocale.value = locale;
   }else if(locale){
@@ -1484,11 +1519,16 @@ document.addEventListener("keydown", event => {
   if(event.key === "Escape" && !reqModal.hidden) closeRequest();
 });
 
-[reqResource, reqSection, reqLocale, reqPlacement, reqTarget].forEach(el => {
-  const handler = () => { localeNotice = ""; updateRequest(); };
+[reqResource, reqSection, reqLocale, reqPlacement].forEach(el => {
+  const handler = () => { localeNotice = ""; targetTouched = false; updateRequest(); };
   el.addEventListener("input", handler);
   el.addEventListener("change", handler);
 });
+
+["input", "change"].forEach(type => reqTarget.addEventListener(type, () => {
+  targetTouched = true;
+  updateRequest();
+}));
 
 reqSuggest.addEventListener("mousedown", event => {
   const button = event.target.closest(".suggest-btn");
@@ -1496,6 +1536,7 @@ reqSuggest.addEventListener("mousedown", event => {
   event.preventDefault();          // поле не теряет фокус, подсказки не мигают
   reqSection.value = SECTIONS[button.dataset.key];
   localeNotice = "";
+  targetTouched = false;
   updateRequest();
 });
 

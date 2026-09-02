@@ -7,27 +7,35 @@
 <title>Редиректные ссылки — подбор</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
 <style>
   :root{
-    --bg: #0B1220;
-    --bg-grid: #0E1626;
-    --card: #121B2E;
-    --card-2: #16213A;
-    --border: #223252;
-    --border-soft: #1B2740;
-    --text: #E7ECF6;
-    --text-dim: #8FA0BF;
-    --text-faint: #4A5A7D;
-    --accent: #35D6B5;
-    --accent-soft: rgba(53,214,181,0.12);
-    --danger: #F2637B;
-    --danger-soft: rgba(242,99,123,0.10);
+    /* палитра снята с корпоративного сайта */
+    --green: #009B7A;
+    --green-dark: #00876B;
+    --green-soft: #E6F5F1;
+    --green-line: #9FDACB;
 
-    --step-1: 12.5px;
-    --step-0: 14.5px;
-    --step-1u: 17px;
-    --step-2u: 28px;
+    --bg: #F5F7F9;
+    --surface: #FFFFFF;
+    --line: #E2E8F0;
+    --line-strong: #CBD5E1;
+
+    --ink: #0B0B0C;
+    --ink-2: #3F4145;
+    --ink-3: #77787A;
+    --ink-4: #9AA0A6;
+
+    --danger: #D92D46;
+    --danger-soft: #FDECEF;
+
+    --step-1: 13px;
+    --step-0: 15px;
+    --step-1u: 18px;
+    --step-2u: 32px;
+
+    --radius: 8px;
+    --radius-lg: 14px;
   }
 
   *{ box-sizing: border-box; }
@@ -36,22 +44,17 @@
     margin:0;
     padding:0;
     background: var(--bg);
-    color: var(--text);
-    font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+    color: var(--ink);
+    font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   body{
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(53,214,181,0.07), transparent 40%),
-      radial-gradient(circle at 90% 90%, rgba(53,214,181,0.05), transparent 45%),
-      linear-gradient(var(--bg-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-    background-size: auto, auto, 42px 42px, 42px 42px;
     display:flex;
     justify-content:center;
-    padding: 56px 20px 80px;
+    padding: 64px 20px 80px;
   }
 
   .wrap{
@@ -60,23 +63,25 @@
   }
 
   h1{
+    font-family: 'Montserrat', 'Roboto', sans-serif;
     font-size: var(--step-2u);
     font-weight: 800;
-    letter-spacing: -0.01em;
-    margin: 0 0 26px;
-    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: 0 0 28px;
+    line-height: 1.2;
+    color: var(--ink);
     text-wrap: balance;
   }
 
-
+  .hidden{ display: none !important; }
   [hidden]{ display: none !important; }
 
   .card{
-    background: linear-gradient(180deg, var(--card), var(--card-2));
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -18px rgba(15, 23, 42, 0.25);
   }
 
   .fields{
@@ -91,40 +96,38 @@
 
   label{
     display:block;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 9px;
+    font-size: var(--step-1);
+    font-weight: 700;
+    color: var(--ink-2);
+    margin-bottom: 8px;
   }
 
   select{
     width: 100%;
     appearance: none;
     -webkit-appearance: none;
-    background: #0E1626;
-    border: 1px solid var(--border);
-    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
     font-family: inherit;
     font-size: var(--step-0);
-    font-weight: 500;
-    padding: 13px 40px 13px 14px;
-    border-radius: 10px;
+    font-weight: 400;
+    padding: 13px 42px 13px 14px;
+    border-radius: var(--radius);
     cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238FA0BF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2377787A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  select:hover{ border-color: #2E4269; }
+  select:hover{ border-color: var(--ink-4); }
 
   select:focus{
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
   }
-
-  select option{ background: #0E1626; color: var(--text); }
 
   /* Локали — плитка кнопок: так сотрудник ищет свой код глазами, а не в списке */
   .locale-grid{
@@ -149,11 +152,11 @@
     flex-direction: column;
     align-items:center;
     justify-content:center;
-    gap: 3px;
+    gap: 2px;
     padding: 11px 6px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #0E1626;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
     transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   }
 
@@ -161,31 +164,34 @@
     font-size: var(--step-1u);
     font-weight: 700;
     letter-spacing: 0.01em;
+    color: var(--ink);
   }
 
   .locale-opt .caption{
     font-size: var(--step-1);
-    font-weight: 500;
-    color: var(--text-dim);
+    font-weight: 400;
+    color: var(--ink-3);
   }
 
-  .locale-opt input:checked + .box .caption{ color: var(--text); }
-
-  .locale-opt input:hover + .box{ border-color: #2E4269; }
+  .locale-opt input:hover + .box{ border-color: var(--ink-4); }
 
   .locale-opt input:checked + .box{
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    box-shadow: 0 0 0 1px var(--accent) inset;
+    border-color: var(--green);
+    background: var(--green-soft);
+    box-shadow: 0 0 0 1px var(--green) inset;
   }
 
+  .locale-opt input:checked + .box .code{ color: var(--green-dark); }
+  .locale-opt input:checked + .box .caption{ color: var(--ink-2); }
+
   .locale-opt input:focus-visible + .box{
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--green);
     outline-offset: 2px;
   }
 
   .locale-opt input:disabled + .box{
-    opacity: 0.35;
+    opacity: 0.4;
+    background: var(--bg);
     cursor: not-allowed;
   }
 
@@ -194,24 +200,24 @@
     margin-top: 26px;
     padding: 15px 20px;
     border: none;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #06231D;
+    border-radius: var(--radius);
+    background: var(--green);
+    color: #FFFFFF;
     font-family: inherit;
-    font-size: 15px;
+    font-size: var(--step-0);
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
   }
 
-  .generate-btn:hover:not(:disabled){ background: #4CE3C4; }
-  .generate-btn:active:not(:disabled){ transform: scale(0.99); }
+  .generate-btn:hover:not(:disabled){ background: var(--green-dark); }
+  .generate-btn:active:not(:disabled){ transform: scale(0.995); }
   .generate-btn:disabled{ opacity: 0.4; cursor: not-allowed; }
 
   .divider{
     height: 1px;
-    background: var(--border-soft);
-    margin: 26px 0 22px;
+    background: var(--line);
+    margin: 28px 0 22px;
   }
 
   .result-label-row{
@@ -219,15 +225,15 @@
     align-items:baseline;
     justify-content:space-between;
     gap: 12px;
-    margin-bottom: 9px;
+    margin-bottom: 8px;
   }
 
   .result-label-row label{ margin-bottom: 0; }
 
   .result-status{
-    font-size: 12px;
-    color: var(--text-faint);
-    font-weight: 500;
+    font-size: 12.5px;
+    color: var(--ink-4);
+    font-weight: 400;
     text-align: right;
   }
 
@@ -239,36 +245,36 @@
   .result-box{
     flex: 1;
     min-width: 0;
-    background: #0A101C;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     padding: 13px 14px;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 13px;
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 13.5px;
     line-height: 1.5;
-    color: var(--text);
+    color: var(--ink);
     white-space: nowrap;
     overflow-x: auto;
   }
 
   .result-box.empty{
-    color: var(--text-faint);
-    font-family: 'Manrope', system-ui, sans-serif;
+    color: var(--ink-4);
+    font-family: 'Roboto', system-ui, sans-serif;
     font-size: var(--step-0);
     white-space: normal;
   }
 
   .result-box.error{
     color: var(--danger);
-    border-color: rgba(242,99,123,0.4);
+    border-color: #F6C6CE;
     background: var(--danger-soft);
-    font-family: 'Manrope', system-ui, sans-serif;
+    font-family: 'Roboto', system-ui, sans-serif;
     font-size: var(--step-0);
     white-space: normal;
   }
 
-  .result-box::-webkit-scrollbar{ height: 5px; }
-  .result-box::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 4px; }
+  .result-box::-webkit-scrollbar{ height: 6px; }
+  .result-box::-webkit-scrollbar-thumb{ background: var(--line-strong); border-radius: 4px; }
 
   .copy-btn{
     flex-shrink: 0;
@@ -276,48 +282,56 @@
     align-items:center;
     justify-content:center;
     gap: 7px;
-    padding: 0 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: #0E1626;
-    color: var(--text);
+    padding: 0 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-2);
     font-family: inherit;
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: var(--step-1);
+    font-weight: 700;
     cursor: pointer;
     transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
   }
 
-  .copy-btn:hover:not(:disabled){ border-color: var(--accent); color: var(--accent); }
+  .copy-btn:hover:not(:disabled){
+    border-color: var(--green);
+    color: var(--green-dark);
+    background: var(--green-soft);
+  }
+
   .copy-btn:disabled{ cursor: not-allowed; opacity: 0.45; }
 
   .copy-btn.copied{
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green-dark);
   }
 
   .copy-btn svg{ flex-shrink:0; }
 
   .note{
     margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: var(--radius);
+    background: var(--green-soft);
+    border: 1px solid var(--green-line);
     font-size: var(--step-1);
-    line-height: 1.6;
-    color: var(--text-dim);
+    line-height: 1.55;
+    color: #05604C;
   }
-
-  .hidden{ display: none !important; }
-
 
   @media (max-width: 560px){
     body{ padding: 32px 16px 56px; }
+    h1{ font-size: 25px; margin-bottom: 22px; }
+    .card{ padding: 20px 18px; }
     .locale-grid{ grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 7px; }
     .locale-opt .box{ padding: 10px 4px; }
-    .locale-opt .caption{ font-size: 11px; }
-    h1{ font-size: 23px; }
-    .card{ padding: 20px 18px; border-radius: 14px; }
+    .locale-opt .caption{ font-size: 11.5px; }
+    .result-label-row{ flex-direction: column; align-items: flex-start; gap: 3px; }
+    .result-status{ text-align: left; }
     .result-row{ flex-direction: column; }
-    .copy-btn{ padding: 13px 16px; }
+    .copy-btn{ padding: 13px 18px; }
   }
 </style>
 </head>
@@ -347,7 +361,7 @@
       </div>
 
       <div class="field" id="fieldPlacement">
-        <label for="placement">Где будете вставлять ссылку</label>
+        <label for="placement">Где будете использовать ссылку</label>
         <select id="placement"></select>
       </div>
 
@@ -420,9 +434,9 @@ const SECTIONS = {
 };
 
 const PLACEMENTS = {
-  email:     "Для содержимого email писем",
-  landing:   "Внутри корпоративного сайта и лендингов",
-  media:     "Для использования командой медиабаинга на лендингах и чат-ботах"
+  email:     "В email-рассылке",
+  landing:   "На сайте и лендингах",
+  media:     "Медиабаинг: лендинги и чат-боты"
 };
 
 const LINKS = [

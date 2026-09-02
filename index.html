@@ -722,6 +722,7 @@
           <div class="field field-wide">
             <label for="reqTarget">Целевая страница — куда должна вести ссылка</label>
             <input type="text" id="reqTarget" placeholder="https://" autocomplete="off">
+            <p class="rule-hint hidden" id="reqResourceHint"></p>
           </div>
 
           <div class="field field-wide">
@@ -1199,6 +1200,7 @@ const reqLocale     = document.getElementById("reqLocale");
 const reqPlacement  = document.getElementById("reqPlacement");
 const reqTarget     = document.getElementById("reqTarget");
 const reqRedirect   = document.getElementById("reqRedirect");
+const reqResourceHint = document.getElementById("reqResourceHint");
 const reqSuggest    = document.getElementById("reqSuggest");
 const reqCheck      = document.getElementById("reqCheck");
 const reqText       = document.getElementById("reqText");
@@ -1333,6 +1335,21 @@ function slugFromUrl(url){
   slug = slug.replace(/^my[-_]?/, "");                                    // среда
   slug = slug.replace(/[-_]/g, "");                                       // дефисы убираем
   return slug;
+}
+
+// какому ресурсу принадлежит домен целевой страницы: npbmarkets.online — сайт,
+// my1.npbaccount.org — кабинет. Карту строим из самого справочника
+function resourceByTarget(url){
+  const host = String(url || "").trim().replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
+  if(!host) return "";
+  const count = {};
+  ROWS.forEach(row => {
+    if(!row.target) return;
+    const rowHost = row.target.replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
+    if(rowHost !== host) return;
+    count[row.resource] = (count[row.resource] || 0) + 1;
+  });
+  return Object.keys(count).sort((a, b) => count[b] - count[a])[0] || "";
 }
 
 // целевая страница из справочника: она зависит от раздела, ресурса и локали,
@@ -1475,6 +1492,7 @@ function openRequest(){
   const locale = selectedLocale();
   localeNotice = "";
   targetTouched = false;
+  reqResourceHint.classList.add("hidden");
   if(REDIRECT_LOCALES.includes(locale)){
     reqLocale.value = locale;
   }else if(locale){
@@ -1520,13 +1538,29 @@ document.addEventListener("keydown", event => {
 });
 
 [reqResource, reqSection, reqLocale, reqPlacement].forEach(el => {
-  const handler = () => { localeNotice = ""; targetTouched = false; updateRequest(); };
+  const handler = () => {
+    localeNotice = "";
+    targetTouched = false;
+    reqResourceHint.classList.add("hidden");
+    updateRequest();
+  };
   el.addEventListener("input", handler);
   el.addEventListener("change", handler);
 });
 
 ["input", "change"].forEach(type => reqTarget.addEventListener(type, () => {
   targetTouched = true;
+
+  // адрес сам говорит, куда ведёт ссылка — сайт это или кабинет
+  const detected = resourceByTarget(reqTarget.value);
+  if(detected && detected !== reqResource.value){
+    reqResource.value = detected;
+    reqResourceHint.textContent = "Ресурс определён по адресу: " + RESOURCES[detected] + ".";
+    reqResourceHint.classList.remove("hidden");
+  }else if(!detected){
+    reqResourceHint.classList.add("hidden");
+  }
+
   updateRequest();
 }));
 

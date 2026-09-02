@@ -522,6 +522,32 @@
     color: var(--green-dark);
   }
 
+  .rule-box{
+    padding: 13px 14px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    word-break: break-all;
+  }
+
+  .rule-box.empty{
+    font-family: 'Roboto', system-ui, sans-serif;
+    color: var(--ink-4);
+  }
+
+  .rule-hint{
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-3);
+  }
+
+  .rule-hint b{ font-weight: 700; color: var(--ink-2); }
+
   .req-text-row{ margin-top: 22px; }
 
   .req-text{
@@ -697,6 +723,12 @@
             <label for="reqTarget">Целевая страница — куда должна вести ссылка</label>
             <input type="text" id="reqTarget" placeholder="https://" autocomplete="off">
           </div>
+
+          <div class="field field-wide">
+            <label>Редиректная ссылка — соберётся по правилам</label>
+            <div class="rule-box" id="reqRedirect"></div>
+            <p class="rule-hint">Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт. Раздел берётся из целевой страницы, дефисы удаляются.</p>
+          </div>
         </div>
 
         <div class="req-text-row">
@@ -776,7 +808,7 @@ const SECTIONS = {
 
 const PLACEMENTS = {
   email:     "В email-рассылке",
-  landing:   "На сайте и лендингах",
+  landing:   "На сайте и лендинге",
   media:     "Медиабаинг: лендинги и чат-боты",
   other:     "Другое"
 };
@@ -805,7 +837,7 @@ const LINKS = [
   { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"email", url:"https://npb-markets.global/en-mycontests" },
   { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"email", url:"https://npb-markets.global/porusupportanalytic" },
 
-  // На сайте и лендингах — личный кабинет
+  // На сайте и лендинге — личный кабинет
   { resource:"lk", section:"glavnaya-stranica",         locale:"ru",                              placement:"landing", url:"https://mynpb.nl/lpru" },
   { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"landing", url:"https://mynpb.nl/lpen" },
   { resource:"lk", section:"glavnaya-stranica",         locale:["es","ms","ua","uz","ar","fa"],   placement:"landing", direct:true, url:"https://my.nmarkets.org/login" },
@@ -1164,6 +1196,7 @@ const reqSection    = document.getElementById("reqSection");
 const reqLocale     = document.getElementById("reqLocale");
 const reqPlacement  = document.getElementById("reqPlacement");
 const reqTarget     = document.getElementById("reqTarget");
+const reqRedirect   = document.getElementById("reqRedirect");
 const reqSuggest    = document.getElementById("reqSuggest");
 const reqCheck      = document.getElementById("reqCheck");
 const reqText       = document.getElementById("reqText");
@@ -1268,6 +1301,55 @@ function describeSection(sectionKey){
   return groups;
 }
 
+/* Правила сборки редиректной ссылки: Локаль-Среда+Раздел.
+   my ставим, когда ведём в личный кабинет; для корпоративного сайта ничего.
+   Название раздела наследуем из целевой страницы и убираем дефисы. */
+
+// домен для назначения берём из справочника: какой чаще используется
+function domainFor(placement){
+  const count = {};
+  ROWS.forEach(row => {
+    if(row.placement !== placement || row.direct) return;
+    const host = row.url.replace(/^https?:\/\//i, "").split("/")[0];
+    count[host] = (count[host] || 0) + 1;
+  });
+  return Object.keys(count).sort((a, b) => count[b] - count[a])[0] || "";
+}
+
+// «https://site.com/ru-mydeposit» -> «deposit»
+function slugFromUrl(url){
+  let path = String(url || "").trim().replace(/^https?:\/\//i, "");
+  const slash = path.indexOf("/");
+  path = slash === -1 ? "" : path.slice(slash + 1);
+  path = path.split(/[?#]/)[0].replace(/^\/+|\/+$/g, "");
+  if(!path) return "";
+
+  const parts = path.split("/").filter(Boolean);
+  let slug = parts[parts.length - 1].toLowerCase();
+
+  slug = slug.replace(/^(ru|en)[-_]?/, "").replace(/[-_]?(ru|en)$/, "");  // локаль по краям
+  slug = slug.replace(/^my[-_]?/, "");                                    // среда
+  slug = slug.replace(/[-_]/g, "");                                       // дефисы убираем
+  return slug;
+}
+
+// если целевую страницу ещё не вписали — подсматриваем в уже готовые ссылки раздела
+function slugFromSection(sectionKey, resource){
+  if(!sectionKey) return "";
+  const own = ROWS.find(row => row.section === sectionKey && row.resource === resource && !row.direct);
+  const any = ROWS.find(row => row.section === sectionKey && !row.direct);
+  const source = own || any;
+  return source ? slugFromUrl(source.url) : "";
+}
+
+function buildRedirect(sectionKey){
+  const domain = domainFor(reqPlacement.value);
+  const slug = slugFromUrl(reqTarget.value) || slugFromSection(sectionKey, reqResource.value);
+  if(!domain || !slug) return "";
+  return "https://" + domain + "/" + reqLocale.value + "-" +
+         (reqResource.value === "lk" ? "my" : "") + slug;
+}
+
 function findExact(){
   const sectionKey = resolveSection(reqSection.value).key;
   if(!sectionKey) return null;
@@ -1330,6 +1412,15 @@ function updateRequest(){
       "<br><br>" + reqCheck.innerHTML;
   }
 
+  const redirect = buildRedirect(sectionKey);
+  if(redirect){
+    reqRedirect.className = "rule-box";
+    reqRedirect.textContent = redirect;
+  }else{
+    reqRedirect.className = "rule-box empty";
+    reqRedirect.textContent = "Укажите целевую страницу — ссылка соберётся сама";
+  }
+
   const lines = [
     "Просьба согласовать подачу заявки на создание редиректных ссылок:",
     "",
@@ -1337,7 +1428,7 @@ function updateRequest(){
     "Раздел: " + (sectionKey ? SECTIONS[sectionKey] : (reqSection.value.trim() || "—")),
     "Локаль: " + localeTitle(reqLocale.value),
     "Назначение: " + PLACEMENTS[reqPlacement.value],
-    "Редиректная ссылка: нужно создать",
+    "Редиректная ссылка: " + (redirect || "нужно создать"),
     "Целевая страница: " + (reqTarget.value.trim() || "—")
   ];
   reqText.textContent = lines.join("\n");

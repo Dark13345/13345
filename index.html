@@ -343,6 +343,228 @@
     color: #05604C;
   }
 
+  .ask-row{
+    margin: 18px 0 0;
+    text-align: center;
+  }
+
+  .ask-btn{
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: var(--step-1);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ask-btn:hover{ color: var(--green-dark); }
+
+  .modal{
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+
+  .modal-back{
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 11, 12, 0.45);
+  }
+
+  .modal-card{
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.35);
+  }
+
+  .modal-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .modal-head h2{
+    font-family: 'Montserrat', 'Roboto', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .modal-close{
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .modal-close:hover{ border-color: var(--ink-4); color: var(--ink); }
+
+  .modal-body{ padding: 22px 24px; }
+
+  .check{
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    font-size: var(--step-1);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .check.found{
+    background: var(--green-soft);
+    border: 1px solid var(--green-line);
+    color: #05604C;
+  }
+
+  .check.missing{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+  }
+
+  .check b{ font-weight: 700; }
+
+  .check-link{
+    display: block;
+    margin-top: 6px;
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 13px;
+    word-break: break-all;
+    color: #05604C;
+  }
+
+  .check ul{
+    margin: 6px 0 0;
+    padding-left: 18px;
+  }
+
+  .check li{ margin-bottom: 2px; }
+
+  .modal-fields{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .modal-fields .field-wide{ grid-column: 1 / -1; }
+
+  .modal-fields input[type="text"]{
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: var(--step-0);
+    padding: 13px 14px;
+    border-radius: var(--radius);
+  }
+
+  .modal-fields input[type="text"]::placeholder{ color: var(--ink-4); }
+
+  .modal-fields input[type="text"]:focus{
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+
+  .suggest{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .suggest-label{
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+
+  .suggest-btn{
+    padding: 5px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .suggest-btn:hover{
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green-dark);
+  }
+
+  .req-text-row{ margin-top: 22px; }
+
+  .req-text{
+    margin: 0;
+    padding: 14px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-family: 'Roboto', system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .modal-foot{
+    display: flex;
+    gap: 10px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .modal-copy{ margin-top: 0; flex: 1; }
+
+  .ghost-btn{
+    flex-shrink: 0;
+    padding: 15px 20px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: var(--step-0);
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .ghost-btn:hover{ border-color: var(--ink-4); color: var(--ink); }
+
+  body.modal-open{ overflow: hidden; }
+
   @media (max-width: 560px){
     body{ padding: 32px 16px 56px; }
     .head{ gap: 12px; padding-bottom: 14px; margin-bottom: 20px; }
@@ -356,6 +578,12 @@
     .result-status{ text-align: left; }
     .result-row{ flex-direction: column; }
     .copy-btn{ padding: 13px 18px; }
+    .modal{ padding: 0; align-items: stretch; }
+    .modal-card{ max-width: none; border: none; border-radius: 0; min-height: 100%; }
+    .modal-head, .modal-body, .modal-foot{ padding-left: 18px; padding-right: 18px; }
+    .modal-fields{ grid-template-columns: 1fr; }
+    .modal-foot{ flex-direction: column-reverse; }
+    .ghost-btn{ width: 100%; }
   }
 </style>
 </head>
@@ -428,6 +656,60 @@
       <p class="note hidden" id="resultNote"></p>
     </div>
 
+  </div>
+
+  <p class="ask-row">
+    <button type="button" class="ask-btn" id="askBtn">Не нашли нужную ссылку?</button>
+  </p>
+
+  <div class="modal" id="reqModal" hidden>
+    <div class="modal-back" id="reqBack"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reqTitle">
+      <div class="modal-head">
+        <h2 id="reqTitle">Заявка на создание ссылки</h2>
+        <button type="button" class="modal-close" id="reqClose" aria-label="Закрыть">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="check" id="reqCheck"></div>
+
+        <div class="modal-fields">
+          <div class="field">
+            <label for="reqResource">Ресурс</label>
+            <select id="reqResource"></select>
+          </div>
+          <div class="field">
+            <label for="reqSection">Раздел</label>
+            <input type="text" id="reqSection" placeholder="Начните вводить: вебинары, MT4, аналитич…" autocomplete="off">
+            <div class="suggest hidden" id="reqSuggest"></div>
+          </div>
+          <div class="field">
+            <label for="reqLocale">Локаль</label>
+            <select id="reqLocale"></select>
+          </div>
+          <div class="field">
+            <label for="reqPlacement">Назначение</label>
+            <select id="reqPlacement"></select>
+          </div>
+          <div class="field field-wide">
+            <label for="reqTarget">Целевая страница — куда должна вести ссылка</label>
+            <input type="text" id="reqTarget" placeholder="https://" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="req-text-row">
+          <label for="reqText">Сообщение для коллеги</label>
+          <pre class="req-text" id="reqText"></pre>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="ghost-btn" id="reqCancel">Закрыть</button>
+        <button type="button" class="generate-btn modal-copy" id="reqCopy">Скопировать сообщение</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -837,19 +1119,23 @@ generateBtn.addEventListener("click", () => {
   rememberChoice();
 });
 
-copyBtn.addEventListener("click", async () => {
-  if(!currentLink) return;
+async function copyToClipboard(text){
   try{
-    await navigator.clipboard.writeText(currentLink);
+    await navigator.clipboard.writeText(text);
   }catch(e){
     // старые браузеры и страницы без https
     const ta = document.createElement("textarea");
-    ta.value = currentLink;
+    ta.value = text;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand("copy");
     document.body.removeChild(ta);
   }
+}
+
+copyBtn.addEventListener("click", async () => {
+  if(!currentLink) return;
+  await copyToClipboard(currentLink);
   copyBtn.classList.add("copied");
   copyLabel.textContent = "Скопировано";
   setTimeout(() => {
@@ -859,6 +1145,276 @@ copyBtn.addEventListener("click", async () => {
 });
 
 buildFields();
+
+/* ============================================================
+   Заявка на новую ссылку. Сначала показываем, что по этому
+   разделу уже есть — половина обращений закрывается здесь.
+   ============================================================ */
+
+const REDIRECT_LOCALES = ["ru", "en"];
+let localeNotice = "";
+
+const askBtn        = document.getElementById("askBtn");
+const reqModal      = document.getElementById("reqModal");
+const reqBack       = document.getElementById("reqBack");
+const reqClose      = document.getElementById("reqClose");
+const reqCancel     = document.getElementById("reqCancel");
+const reqResource   = document.getElementById("reqResource");
+const reqSection    = document.getElementById("reqSection");
+const reqLocale     = document.getElementById("reqLocale");
+const reqPlacement  = document.getElementById("reqPlacement");
+const reqTarget     = document.getElementById("reqTarget");
+const reqSuggest    = document.getElementById("reqSuggest");
+const reqCheck      = document.getElementById("reqCheck");
+const reqText       = document.getElementById("reqText");
+const reqCopy       = document.getElementById("reqCopy");
+
+/* Коллега может написать раздел как угодно: «аналитич портал», «регистр»,
+   «МТ4» кириллицей. Приводим и ввод, и названия к общему виду и ищем
+   по началу слов, а не по точному совпадению. */
+
+// как разделы называют в переписке — латинские названия пишут кириллицей
+const ALIASES = {
+  "cashback":            ["кэшбэк", "кешбэк", "кэшбек", "кешбек", "кеш бэк", "кэш бэк"],
+  "swap-free":           ["свап фри", "своп фри", "свопфри", "свапфри", "исламский счет", "исламские счета"],
+  "mt4":                 ["мт4", "метатрейдер", "метатрейдер 4", "metatrader", "мета трейдер"],
+  "stp-ndd":             ["стп ндд", "стп", "ндд"],
+  "referalnye-ssylki-i-promo": ["реф ссылки", "рефералка", "партнерские ссылки"],
+  "analiticheskiy-portal":     ["аналитика", "портал аналитики"],
+  "vosstanovlenie-parolya":    ["сброс пароля", "забыл пароль"],
+  "licenzii":            ["регулирование", "лицензия"],
+  "uchebnyy-schet-demo": ["демо счет", "демо"],
+  "glavnaya-stranica":   ["главная", "домашняя страница"]
+};
+
+// похожие по начертанию буквы: русское «мт4» и латинское «mt4» станут одинаковыми
+const LOOKALIKE = { "а":"a", "б":"b", "в":"b", "е":"e", "к":"k", "м":"m", "н":"h",
+                    "о":"o", "р":"p", "с":"c", "т":"t", "у":"y", "х":"x" };
+
+function norm(text){
+  return (text || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^0-9a-zа-я]+/gi, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .split("")
+    .map(ch => LOOKALIKE[ch] || ch)
+    .join("");
+}
+
+// возвращает распознанный раздел и близкие варианты для подсказки
+function resolveSection(text){
+  const query = norm(text);
+  if(!query) return { key: "", exact: false, candidates: [] };
+
+  const keys = Object.keys(SECTIONS);
+  const exact = keys.find(key => norm(SECTIONS[key]) === query);
+  if(exact) return { key: exact, exact: true, candidates: [] };
+
+  const words = query.split(" ");
+  const scored = [];
+
+  // насколько один вариант написания похож на то, что ввели
+  function rate(name){
+    const target = norm(name);
+    const targetWords = target.split(" ");
+    if(target === query) return 120;
+    if(target.indexOf(query) === 0) return 100;                  // «регистр» -> «Регистрация»
+    if(target.includes(query)) return 80;                        // ввод целиком внутри названия
+    if(words.every(w => targetWords.some(tw => tw.startsWith(w)))) return 60;  // «аналитич портал»
+    const hits = words.filter(w => targetWords.some(tw => tw.startsWith(w))).length;
+    if(hits && words.length > 1) return 20 + hits * 5;           // совпала часть слов
+    return 0;
+  }
+
+  keys.forEach(key => {
+    const byName = rate(SECTIONS[key]);
+    // совпадение по синониму чуть слабее: «счет» должен вести к счетам,
+    // а не к Swap Free с его синонимом «исламский счет»
+    const byAlias = (ALIASES[key] || []).reduce(
+      (best, alias) => Math.max(best, rate(alias)), 0);
+    const score = Math.max(byName, byAlias ? byAlias - 5 : 0);
+    if(score) scored.push({ key: key, score: score });
+  });
+
+  scored.sort((a, b) =>
+    b.score - a.score || SECTIONS[a.key].length - SECTIONS[b.key].length);
+
+  const candidates = scored.slice(0, 4).map(x => x.key);
+  // берём вариант, только если он один или заметно лучше остальных
+  const confident = scored.length === 1 ||
+    (scored.length > 1 && scored[0].score > scored[1].score);
+
+  return { key: confident ? scored[0].key : "", exact: false, candidates: candidates };
+}
+
+function localeTitle(code){
+  const found = LOCALES.find(l => l.code === code);
+  return found ? found.title : code.toUpperCase();
+}
+
+// что уже есть по этому разделу — во всех назначениях и языках
+function describeSection(sectionKey){
+  const groups = [];
+  ROWS.forEach(row => {
+    if(row.section !== sectionKey) return;
+    const label = RESOURCES[row.resource] + " · " + PLACEMENTS[row.placement];
+    let group = groups.find(g => g.label === label);
+    if(!group){ group = { label: label, locales: [] }; groups.push(group); }
+    const title = localeTitle(row.locale) + (row.direct ? " (прямая)" : "");
+    if(!group.locales.includes(title)) group.locales.push(title);
+  });
+  return groups;
+}
+
+function findExact(){
+  const sectionKey = resolveSection(reqSection.value).key;
+  if(!sectionKey) return null;
+  return ROWS.find(row =>
+    row.resource === reqResource.value &&
+    row.section === sectionKey &&
+    row.locale === reqLocale.value &&
+    row.placement === reqPlacement.value
+  );
+}
+
+function updateRequest(){
+  const guess = resolveSection(reqSection.value);
+  const sectionKey = guess.key;
+  const exact = findExact();
+
+  // варианты под полем — когда написали не слово в слово
+  if(!guess.exact && guess.candidates.length){
+    const html = '<span class="suggest-label">Возможно:</span>' +
+      guess.candidates.map(key =>
+        '<button type="button" class="suggest-btn" data-key="' + key + '">' +
+        SECTIONS[key] + "</button>").join("");
+    // перерисовываем только при реальном изменении: иначе кнопка пропадёт
+    // из-под курсора между нажатием и отпусканием мыши
+    if(reqSuggest.innerHTML !== html) reqSuggest.innerHTML = html;
+    reqSuggest.classList.remove("hidden");
+  }else if(!reqSuggest.classList.contains("hidden")){
+    reqSuggest.innerHTML = "";
+    reqSuggest.classList.add("hidden");
+  }
+
+  const understood = (sectionKey && !guess.exact)
+    ? "Понял как «" + SECTIONS[sectionKey] + "». "
+    : "";
+
+  if(exact){
+    reqCheck.className = "check found";
+    reqCheck.innerHTML = understood + "<b>Такая ссылка уже есть.</b> Заявка не нужна — скопируйте её:" +
+      '<span class="check-link">' + exact.url + "</span>";
+  }else{
+    const groups = sectionKey ? describeSection(sectionKey) : [];
+    reqCheck.className = "check missing";
+    if(groups.length){
+      reqCheck.innerHTML = understood + "<b>Ровно такого сочетания нет.</b> По разделу «" +
+        SECTIONS[sectionKey] + "» есть:<ul>" +
+        groups.map(g => "<li>" + g.label + " — " + g.locales.join(", ") + "</li>").join("") +
+        "</ul>";
+    }else if(sectionKey){
+      reqCheck.innerHTML = "<b>По разделу «" + SECTIONS[sectionKey] +
+        "» ссылок пока нет.</b> Отправьте заявку.";
+    }else{
+      reqCheck.innerHTML = "<b>Такого раздела в справочнике нет.</b> " +
+        "Проверьте название или отправьте заявку — раздел заведут вместе со ссылкой.";
+    }
+  }
+
+  if(localeNotice){
+    reqCheck.innerHTML = "<b>Для локали " + localeNotice + " редиректные ссылки не делают:</b> " +
+      "там сайты не блокируются, используется прямая ссылка. Заявку оформляем на RU или EN." +
+      "<br><br>" + reqCheck.innerHTML;
+  }
+
+  const lines = [
+    "Просьба согласовать подачу заявки на создание редиректных ссылок:",
+    "",
+    "Ресурс: " + RESOURCES[reqResource.value],
+    "Раздел: " + (sectionKey ? SECTIONS[sectionKey] : (reqSection.value.trim() || "—")),
+    "Локаль: " + localeTitle(reqLocale.value),
+    "Назначение: " + PLACEMENTS[reqPlacement.value],
+    "Редиректная ссылка: нужно создать",
+    "Целевая страница: " + (reqTarget.value.trim() || "—")
+  ];
+  reqText.textContent = lines.join("\n");
+}
+
+function openRequest(){
+  // подставляем то, что сотрудник уже выбрал в форме
+  reqResource.value = resourceSelect.value;
+  reqSection.value = SECTIONS[sectionSelect.value] || "";
+  const locale = selectedLocale();
+  localeNotice = "";
+  if(REDIRECT_LOCALES.includes(locale)){
+    reqLocale.value = locale;
+  }else if(locale){
+    // на этой локали редирект не нужен — предупреждаем, а не молча подменяем
+    localeNotice = localeTitle(locale);
+    reqLocale.value = "ru";
+  }
+  if(placementSelect.value) reqPlacement.value = placementSelect.value;
+
+  updateRequest();
+  reqModal.hidden = false;
+  document.body.classList.add("modal-open");
+  reqSection.focus();
+}
+
+function closeRequest(){
+  reqModal.hidden = true;
+  document.body.classList.remove("modal-open");
+  reqCopy.textContent = "Скопировать сообщение";
+  askBtn.focus();
+}
+
+// поля модалки заполняем из тех же словарей, что и основную форму
+function buildRequestFields(){
+  fillSelect(reqResource, Object.keys(RESOURCES), RESOURCES, false);
+  fillSelect(reqPlacement, Object.keys(PLACEMENTS), PLACEMENTS, false);
+  // редиректы делают только для RU и EN — на остальных локалях сайты не блокируют
+  reqLocale.innerHTML = "";
+  LOCALES.filter(loc => REDIRECT_LOCALES.includes(loc.code)).forEach(loc => {
+    const option = document.createElement("option");
+    option.value = loc.code;
+    option.textContent = loc.title + " — " + loc.caption;
+    reqLocale.appendChild(option);
+  });
+}
+
+askBtn.addEventListener("click", openRequest);
+reqClose.addEventListener("click", closeRequest);
+reqCancel.addEventListener("click", closeRequest);
+reqBack.addEventListener("click", closeRequest);
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape" && !reqModal.hidden) closeRequest();
+});
+
+[reqResource, reqSection, reqLocale, reqPlacement, reqTarget].forEach(el => {
+  const handler = () => { localeNotice = ""; updateRequest(); };
+  el.addEventListener("input", handler);
+  el.addEventListener("change", handler);
+});
+
+reqSuggest.addEventListener("mousedown", event => {
+  const button = event.target.closest(".suggest-btn");
+  if(!button) return;
+  event.preventDefault();          // поле не теряет фокус, подсказки не мигают
+  reqSection.value = SECTIONS[button.dataset.key];
+  localeNotice = "";
+  updateRequest();
+});
+
+reqCopy.addEventListener("click", async () => {
+  await copyToClipboard(reqText.textContent);
+  reqCopy.textContent = "Сообщение скопировано";
+  setTimeout(() => { reqCopy.textContent = "Скопировать сообщение"; }, 1800);
+});
+
+buildRequestFields();
 </script>
 
 </body>

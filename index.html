@@ -589,6 +589,16 @@
 
   .ghost-btn:hover{ border-color: var(--ink-4); color: var(--ink); }
 
+  .chat-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .chat-btn:hover{ border-color: var(--green); color: var(--green-dark); }
+
   body.modal-open{ overflow: hidden; }
 
   @media (max-width: 560px){
@@ -735,11 +745,16 @@
         <div class="req-text-row">
           <label for="reqText">Сообщение для коллеги</label>
           <pre class="req-text" id="reqText"></pre>
+          <p class="rule-hint">Заявки принимает <b id="contactName"></b> — скопируйте сообщение и отправьте ему в чат.</p>
         </div>
       </div>
 
       <div class="modal-foot">
         <button type="button" class="ghost-btn" id="reqCancel">Закрыть</button>
+        <a class="ghost-btn chat-btn" id="contactLink" href="#" target="_blank" rel="noopener">
+          Открыть чат
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path></svg>
+        </a>
         <button type="button" class="generate-btn modal-copy" id="reqCopy">Скопировать сообщение</button>
       </div>
     </div>
@@ -1186,8 +1201,15 @@ buildFields();
    ============================================================ */
 
 const REDIRECT_LOCALES = ["ru", "en"];
+
+// кому уходят заявки на новые редиректные ссылки
+const REQUEST_CONTACT = {
+  name: "@artur.molov",
+  chat: "https://matrix.to/#/@artur.molov:element-server.ncorp.nl"
+};
 let localeNotice = "";
-let targetTouched = false;   // сотрудник правил целевую страницу вручную
+let targetTouched = false;     // сотрудник правил целевую страницу вручную
+let resourceTouched = false;   // сотрудник сам выбрал ресурс — не переучиваем
 
 const askBtn        = document.getElementById("askBtn");
 const reqModal      = document.getElementById("reqModal");
@@ -1466,6 +1488,16 @@ function updateRequest(){
   if(!targetTouched){
     const suggested = targetFor(sectionKey, reqResource.value, reqLocale.value);
     if(reqTarget.value !== suggested) reqTarget.value = suggested;
+
+    // раздел может жить только на сайте или только в кабинете — адрес это покажет
+    if(suggested && !resourceTouched){
+      const detected = resourceByTarget(suggested);
+      if(detected && detected !== reqResource.value){
+        reqResource.value = detected;
+        reqResourceHint.textContent = "Ресурс уточнён по целевой странице: " + RESOURCES[detected] + ".";
+        reqResourceHint.classList.remove("hidden");
+      }
+    }
   }
 
   const built = buildRedirect(sectionKey);
@@ -1498,6 +1530,7 @@ function openRequest(){
   const locale = selectedLocale();
   localeNotice = "";
   targetTouched = false;
+  resourceTouched = false;
   reqResourceHint.classList.add("hidden");
   if(REDIRECT_LOCALES.includes(locale)){
     reqLocale.value = locale;
@@ -1523,6 +1556,9 @@ function closeRequest(){
 
 // поля модалки заполняем из тех же словарей, что и основную форму
 function buildRequestFields(){
+  document.getElementById("contactName").textContent = REQUEST_CONTACT.name;
+  document.getElementById("contactLink").href = REQUEST_CONTACT.chat;
+
   fillSelect(reqResource, Object.keys(RESOURCES), RESOURCES, false);
   fillSelect(reqPlacement, Object.keys(PLACEMENTS), PLACEMENTS, false);
   // редиректы делают только для RU и EN — на остальных локалях сайты не блокируют
@@ -1547,6 +1583,7 @@ document.addEventListener("keydown", event => {
   const handler = () => {
     localeNotice = "";
     targetTouched = false;
+    if(el === reqResource) resourceTouched = true;
     reqResourceHint.classList.add("hidden");
     updateRequest();
   };

@@ -977,6 +977,20 @@ LINKS.forEach(row => {
    Дальше — механика. Правится редко.
    ============================================================ */
 
+const REDIRECT_LOCALES = ["ru", "en"];
+
+/* У корпоративного сайта есть локальные версии на своих поддоменах:
+   ar/id/ms/ua/uz те же, а вьетнамская — vi (не vn). Испанской и персидской
+   версий сайта нет, для них прямой ссылки не существует.
+   Адрес страницы внутри локали тот же, что у русской версии. */
+const SITE_LOCALE_HOSTS = { ar: "ar", id: "id", ms: "ms", ua: "ua", uz: "uz", vn: "vi" };
+
+// кому уходят заявки на новые редиректные ссылки
+const REQUEST_CONTACT = {
+  name: "@artur.molov",
+  chat: "https://matrix.to/#/@artur.molov:element-server.ncorp.nl"
+};
+
 const STORAGE_KEY = "redirect-picker-last-choice";
 
 
@@ -1038,25 +1052,20 @@ function refreshChain(){
   fillSelect(sectionSelect, sectionKeys, SECTIONS, true);
   const section = sectionSelect.value;
 
-  const localeKeys = optionsFor("locale", { resource, section });
-  let localeStillAvailable = false;
+  // все локали доступны всегда: для RU и EN есть редирект, для остальных —
+  // прямая ссылка, если она заведена в справочнике
   localeGrid.querySelectorAll('input[name="locale"]').forEach(input => {
-    const available = localeKeys.includes(input.value);
-    input.disabled = !available;
-    if(!available && input.checked) input.checked = false;
-    if(available && input.checked) localeStillAvailable = true;
+    input.disabled = false;
   });
-  if(!localeStillAvailable){
-    const first = localeGrid.querySelector('input[name="locale"]:not(:disabled)');
+  if(!localeGrid.querySelector('input[name="locale"]:checked')){
+    const first = localeGrid.querySelector('input[name="locale"]');
     if(first) first.checked = true;
   }
-  const locale = selectedLocale();
 
-  const placementKeys = optionsFor("placement", { resource, section, locale });
+  const placementKeys = optionsFor("placement", { resource, section });
   fillSelect(placementSelect, placementKeys, PLACEMENTS, true);
 
   fieldSection.classList.toggle("is-locked", sectionKeys.length === 0);
-  fieldLocale.classList.toggle("is-locked", localeKeys.length === 0);
   fieldPlacement.classList.toggle("is-locked", placementKeys.length === 0);
   generateBtn.disabled = placementKeys.length === 0;
 
@@ -1079,12 +1088,45 @@ function findLink(){
   const section   = sectionSelect.value;
   const locale    = selectedLocale();
   const placement = placementSelect.value;
-  return ROWS.find(row =>
+
+  const exact = ROWS.find(row =>
     row.resource === resource &&
     row.section === section &&
     row.locale === locale &&
     row.placement === placement
   );
+  if(exact) return exact;
+
+  // прямая ссылка — это просто адрес страницы, он одинаков независимо
+  // от того, куда сотрудник её вставит
+  if(!REDIRECT_LOCALES.includes(locale)){
+    const direct = ROWS.find(row =>
+      row.resource === resource &&
+      row.section === section &&
+      row.locale === locale &&
+      row.direct
+    );
+    if(direct) return direct;
+
+    // для корпоративного сайта — локальная версия той же страницы
+    if(resource === "site" && SITE_LOCALE_HOSTS[locale]){
+      const source = ROWS.find(row => row.resource === "site" && row.section === section && row.target);
+      const localized = source ? localizeSiteUrl(source.target, locale) : "";
+      if(localized){
+        return { resource: resource, section: section, locale: locale,
+                 placement: placement, url: localized, direct: true };
+      }
+    }
+  }
+  return null;
+}
+
+// https://ru.npbmarkets.online/documents -> https://vi.npbmarkets.online/documents
+function localizeSiteUrl(url, locale){
+  const host = SITE_LOCALE_HOSTS[locale];
+  if(!host) return "";
+  const match = String(url).match(/^(https?:\/\/)(ru|en)\.(.+)$/i);
+  return match ? match[1] + host + "." + match[3] : "";
 }
 
 function rememberChoice(){
@@ -1152,8 +1194,16 @@ generateBtn.addEventListener("click", () => {
   const row = findLink();
 
   if(!row){
+    const locale = selectedLocale();
+    const sectionTitle = SECTIONS[sectionSelect.value] || "";
     currentLink = "";
-    resultBox.textContent = "Для такой комбинации ссылки в справочнике нет. Проверьте выбор или запросите ссылку у ответственного за таблицу.";
+    resultBox.textContent = REDIRECT_LOCALES.includes(locale)
+      ? "Для такой комбинации ссылки в справочнике нет. Проверьте выбор или запросите ссылку у ответственного за таблицу."
+      : (resourceSelect.value === "site" && !SITE_LOCALE_HOSTS[locale]
+          ? "Версии корпоративного сайта на локали " + locale.toUpperCase() + " нет — есть только AR, ID, MS, UA, UZ и VN. " +
+            "Уточните у " + REQUEST_CONTACT.name + "."
+          : "Для локали " + locale.toUpperCase() + " по разделу «" + sectionTitle + "» прямой ссылки в справочнике нет. " +
+            "Редирект на этой локали не нужен — запросите прямую ссылку у " + REQUEST_CONTACT.name + ".");
     resultBox.className = "result-box error";
     resultStatus.textContent = "Не найдено";
     resultNote.classList.add("hidden");
@@ -1219,13 +1269,6 @@ buildFields();
    разделу уже есть — половина обращений закрывается здесь.
    ============================================================ */
 
-const REDIRECT_LOCALES = ["ru", "en"];
-
-// кому уходят заявки на новые редиректные ссылки
-const REQUEST_CONTACT = {
-  name: "@artur.molov",
-  chat: "https://matrix.to/#/@artur.molov:element-server.ncorp.nl"
-};
 let targetTouched = false;     // сотрудник правил целевую страницу вручную
 let resourceTouched = false;   // сотрудник сам выбрал ресурс — не переучиваем
 

@@ -1198,12 +1198,11 @@ generateBtn.addEventListener("click", () => {
     const sectionTitle = SECTIONS[sectionSelect.value] || "";
     currentLink = "";
     resultBox.textContent = REDIRECT_LOCALES.includes(locale)
-      ? "Для такой комбинации ссылки в справочнике нет. Проверьте выбор или запросите ссылку у ответственного за таблицу."
+      ? "Такой ссылки в справочнике пока нет. Проверьте выбор — или оформите заявку кнопкой под карточкой."
       : (resourceSelect.value === "site" && !SITE_LOCALE_HOSTS[locale]
-          ? "Версии корпоративного сайта на локали " + locale.toUpperCase() + " нет — есть только AR, ID, MS, UA, UZ и VN. " +
-            "Уточните у " + REQUEST_CONTACT.name + "."
-          : "Для локали " + locale.toUpperCase() + " по разделу «" + sectionTitle + "» прямой ссылки в справочнике нет. " +
-            "Редирект на этой локали не нужен — запросите прямую ссылку у " + REQUEST_CONTACT.name + ".");
+          ? "Корпоративный сайт на локали " + locale.toUpperCase() + " пока не запущен. Доступны AR, ID, MS, UA, UZ и VN."
+          : "Прямой ссылки для локали " + locale.toUpperCase() + " по разделу «" + sectionTitle + "» пока нет — " +
+            "её ещё не завели в справочнике.");
     resultBox.className = "result-box error";
     resultStatus.textContent = "Не найдено";
     resultNote.classList.add("hidden");

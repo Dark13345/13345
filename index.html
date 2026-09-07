@@ -1226,7 +1226,6 @@ const REQUEST_CONTACT = {
   name: "@artur.molov",
   chat: "https://matrix.to/#/@artur.molov:element-server.ncorp.nl"
 };
-let localeNotice = "";
 let targetTouched = false;     // сотрудник правил целевую страницу вручную
 let resourceTouched = false;   // сотрудник сам выбрал ресурс — не переучиваем
 
@@ -1483,25 +1482,17 @@ function updateRequest(){
       '<span class="check-link">' + exact.url + "</span>";
   }else{
     const groups = sectionKey ? describeSection(sectionKey) : [];
-    reqCheck.className = "check missing";
     if(groups.length){
+      reqCheck.className = "check missing";
       reqCheck.innerHTML = understood + "<b>Ровно такого сочетания нет.</b> По разделу «" +
         SECTIONS[sectionKey] + "» есть:<ul>" +
         groups.map(g => "<li>" + g.label + " — " + g.locales.join(", ") + "</li>").join("") +
         "</ul>";
-    }else if(sectionKey){
-      reqCheck.innerHTML = "<b>По разделу «" + SECTIONS[sectionKey] +
-        "» ссылок пока нет.</b> Отправьте заявку.";
     }else{
-      reqCheck.innerHTML = "<b>Такого раздела в справочнике нет.</b> " +
-        "Проверьте название или отправьте заявку — раздел заведут вместе со ссылкой.";
+      // раздела в справочнике нет — это нормально для заявки, молчим
+      reqCheck.className = "check hidden";
+      reqCheck.innerHTML = "";
     }
-  }
-
-  if(localeNotice){
-    reqCheck.innerHTML = "<b>Для локали " + localeNotice + " редиректные ссылки не делают:</b> " +
-      "там сайты не блокируются, используется прямая ссылка. Заявку оформляем на RU или EN." +
-      "<br><br>" + reqCheck.innerHTML;
   }
 
   if(!targetTouched){
@@ -1543,23 +1534,16 @@ function updateRequest(){
 }
 
 function openRequest(){
-  // подставляем то, что сотрудник уже выбрал в форме
-  reqResource.value = resourceSelect.value;
-  reqSection.value = SECTIONS[sectionSelect.value] || "";
-  const locale = selectedLocale();
-  localeNotice = "";
+  // заявку заполняют с нуля: ничего из основной формы не переносим,
+  // иначе попап сразу сообщал «такая ссылка уже есть» и сбивал с толку
+  reqResource.selectedIndex = 0;
+  reqLocale.selectedIndex = 0;
+  reqPlacement.selectedIndex = 0;
+  reqSection.value = "";
+  reqTarget.value = "";
   targetTouched = false;
   resourceTouched = false;
   reqResourceHint.classList.add("hidden");
-  if(REDIRECT_LOCALES.includes(locale)){
-    reqLocale.value = locale;
-  }else if(locale){
-    // на этой локали редирект не нужен — предупреждаем, а не молча подменяем
-    localeNotice = localeTitle(locale);
-    reqLocale.value = "ru";
-  }
-  if(placementSelect.value) reqPlacement.value = placementSelect.value;
-
   updateRequest();
   reqModal.hidden = false;
   document.body.classList.add("modal-open");
@@ -1600,8 +1584,6 @@ document.addEventListener("keydown", event => {
 
 [reqResource, reqSection, reqLocale, reqPlacement].forEach(el => {
   const handler = () => {
-    localeNotice = "";
-    targetTouched = false;
     if(el === reqResource) resourceTouched = true;
     reqResourceHint.classList.add("hidden");
     updateRequest();
@@ -1611,7 +1593,8 @@ document.addEventListener("keydown", event => {
 });
 
 ["input", "change"].forEach(type => reqTarget.addEventListener(type, () => {
-  targetTouched = true;
+  // пустое поле снова отдаём автоподстановке, заполненное — не трогаем
+  targetTouched = reqTarget.value.trim() !== "";
 
   // адрес сам говорит, куда ведёт ссылка — сайт это или кабинет
   const detected = resourceByTarget(reqTarget.value);
@@ -1631,7 +1614,6 @@ reqSuggest.addEventListener("mousedown", event => {
   if(!button) return;
   event.preventDefault();          // поле не теряет фокус, подсказки не мигают
   reqSection.value = SECTIONS[button.dataset.key];
-  localeNotice = "";
   targetTouched = false;
   updateRequest();
 });

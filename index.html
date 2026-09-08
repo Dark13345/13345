@@ -622,6 +622,45 @@
     word-break: break-word;
   }
 
+  .req-text-wrap{ position: relative; }
+
+  .req-text-wrap .req-text{ padding-right: 46px; }
+
+  .copy-mini{
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+
+  .copy-mini:hover{
+    border-color: var(--green);
+    color: var(--green-dark);
+    background: var(--green-soft);
+  }
+
+  .copy-mini .icon-done{ display: none; }
+
+  .copy-mini.copied{
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green-dark);
+  }
+
+  .copy-mini.copied .icon-copy{ display: none; }
+  .copy-mini.copied .icon-done{ display: block; }
+
   .modal-foot{
     display: flex;
     gap: 10px;
@@ -805,7 +844,13 @@
 
         <div class="req-text-row">
           <label for="reqText">Сообщение для коллеги</label>
-          <pre class="req-text" id="reqText"></pre>
+          <div class="req-text-wrap">
+            <pre class="req-text" id="reqText"></pre>
+            <button type="button" class="copy-mini" id="reqCopyMini" aria-label="Скопировать сообщение" title="Скопировать сообщение">
+              <svg class="icon-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <svg class="icon-done" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+            </button>
+          </div>
           <p class="rule-hint">Заявки принимает <b id="contactName"></b> — скопируйте сообщение и отправьте ему в чат.</p>
         </div>
       </div>
@@ -1773,10 +1818,39 @@ reqSuggest.addEventListener("mousedown", event => {
   updateRequest();
 });
 
-reqCopy.addEventListener("click", async () => {
+const reqCopyMini = document.getElementById("reqCopyMini");
+
+/* Кнопки копирования слушают нажатие, а не клик: пока сотрудник печатал
+   в поле раздела, блок проверки успевает раскрыться, содержимое съезжает
+   вниз — и кнопка уходит из-под курсора между нажатием и отпусканием мыши.
+   Клавиатуру обрабатываем отдельно, повторное срабатывание отсекаем по времени. */
+function onCopyPress(button, action){
+  let last = 0;
+  const run = event => {
+    if(event.type === "mousedown") event.preventDefault();
+    const now = Date.now();
+    if(now - last < 500) return;
+    last = now;
+    action();
+  };
+  button.addEventListener("mousedown", run);
+  button.addEventListener("click", run);
+  button.addEventListener("keydown", event => {
+    if(event.key === "Enter" || event.key === " ") run(event);
+  });
+}
+
+onCopyPress(reqCopy, async () => {
   await copyToClipboard(reqText.textContent);
   reqCopy.textContent = "Сообщение скопировано";
   setTimeout(() => { reqCopy.textContent = "Скопировать сообщение"; }, 1800);
+});
+
+// та же кнопка, но прямо в углу сообщения
+onCopyPress(reqCopyMini, async () => {
+  await copyToClipboard(reqText.textContent);
+  reqCopyMini.classList.add("copied");
+  setTimeout(() => reqCopyMini.classList.remove("copied"), 1800);
 });
 
 buildRequestFields();

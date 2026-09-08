@@ -1178,8 +1178,60 @@ function findLink(){
                  placement: placement, url: localized, direct: true };
       }
     }
+
+    // для личного кабинета — тот же путь на домене этой группы локалей
+    if(resource === "lk"){
+      const host = directHostFor(locale);
+      const path = lkPathFor(section);
+      if(host && path){
+        return { resource: resource, section: section, locale: locale,
+                 placement: placement, url: "https://" + host + path, direct: true };
+      }
+    }
   }
   return null;
+}
+
+// домен прямых ссылок для локали берём из тех, что уже есть в справочнике:
+// ES/MS/UA/UZ/AR/FA — один, VN/ID — другой
+function directHostFor(locale){
+  const row = ROWS.find(r => r.resource === "lk" && r.locale === locale && r.direct);
+  return row ? row.url.replace(/^https?:\/\//i, "").split("/")[0] : "";
+}
+
+// основной домен кабинета — самый частый среди целевых страниц ЛК
+function mainLkHost(){
+  const count = {};
+  ROWS.forEach(row => {
+    if(row.resource !== "lk" || !row.target) return;
+    const host = row.target.replace(/^https?:\/\//i, "").split("/")[0];
+    count[host] = (count[host] || 0) + 1;
+  });
+  return Object.keys(count).sort((a, b) => count[b] - count[a])[0] || "";
+}
+
+// путь страницы раздела внутри кабинета
+function lkPathFor(section){
+  const main = mainLkHost();
+
+  // 1) из целевой страницы, если она ведёт в сам кабинет
+  const byTarget = ROWS.find(row => row.resource === "lk" && row.section === section && row.target &&
+    row.target.replace(/^https?:\/\//i, "").split("/")[0] === main);
+  if(byTarget){
+    const path = byTarget.target.replace(/^https?:\/\/[^/]+/i, "");
+    if(path && path !== "/") return path;
+  }
+
+  // 2) из редиректной ссылки, если в ней настоящий путь (/trade-accounts/new/acc/master),
+  //    а не короткий код редиректа (/ru-mydeposit)
+  const byUrl = ROWS.find(row => {
+    if(row.resource !== "lk" || row.section !== section || row.direct) return false;
+    const path = row.url.replace(/^https?:\/\/[^/]+/i, "");
+    return path.split("/").filter(Boolean).length > 1;
+  });
+  if(byUrl) return byUrl.url.replace(/^https?:\/\/[^/]+/i, "");
+
+  return "";
 }
 
 // https://ru.npbmarkets.online/documents -> https://vi.npbmarkets.online/documents

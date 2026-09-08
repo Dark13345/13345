@@ -686,15 +686,15 @@
 
   .ghost-btn:hover{ border-color: var(--ink-4); color: var(--ink); }
 
-  .chat-btn{
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    text-decoration: none;
-    white-space: nowrap;
+  .contact-link{
+    color: var(--green-dark);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
-  .chat-btn:hover{ border-color: var(--green); color: var(--green-dark); }
+  .contact-link:hover{ color: var(--green); }
+
 
   body.modal-open{ overflow: hidden; }
 
@@ -851,16 +851,12 @@
               <svg class="icon-done" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
             </button>
           </div>
-          <p class="rule-hint">Заявки принимает <b id="contactName"></b> — скопируйте сообщение и отправьте ему в чат.</p>
+          <p class="rule-hint">Заявки принимает <a class="contact-link" id="contactLink" href="#" target="_blank" rel="noopener"></a> — скопируйте сообщение и отправьте ему в чат.</p>
         </div>
       </div>
 
       <div class="modal-foot">
         <button type="button" class="ghost-btn" id="reqCancel">Закрыть</button>
-        <a class="ghost-btn chat-btn" id="contactLink" href="#" target="_blank" rel="noopener">
-          Открыть чат
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path></svg>
-        </a>
         <button type="button" class="generate-btn modal-copy" id="reqCopy">Скопировать сообщение</button>
       </div>
     </div>
@@ -1093,7 +1089,7 @@ const SITE_LOCALE_HOSTS = { ar: "ar", id: "id", ms: "ms", ua: "ua", uz: "uz", vn
 
 // кому уходят заявки на новые редиректные ссылки
 const REQUEST_CONTACT = {
-  name: "@artur.molov",
+  name: "artur.molov",
   chat: "https://matrix.to/#/@artur.molov:element-server.ncorp.nl"
 };
 
@@ -1759,8 +1755,9 @@ function closeRequest(){
 
 // поля модалки заполняем из тех же словарей, что и основную форму
 function buildRequestFields(){
-  document.getElementById("contactName").textContent = REQUEST_CONTACT.name;
-  document.getElementById("contactLink").href = REQUEST_CONTACT.chat;
+  const contactLink = document.getElementById("contactLink");
+  contactLink.textContent = REQUEST_CONTACT.name;
+  contactLink.href = REQUEST_CONTACT.chat;
 
   fillSelect(reqResource, Object.keys(RESOURCES), RESOURCES, false);
   fillSelect(reqPlacement, Object.keys(PLACEMENTS), PLACEMENTS, false);

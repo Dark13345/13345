@@ -522,6 +522,64 @@
     color: var(--green-dark);
   }
 
+  .hint{
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .hint-btn{
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .hint-btn:hover,
+  .hint-btn:focus-visible{
+    border-color: var(--green);
+    color: var(--green-dark);
+    outline: none;
+  }
+
+  .hint-bubble{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: -8px;
+    z-index: 5;
+    width: 280px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.3);
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink-2);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease;
+  }
+
+  .hint-bubble b{ font-weight: 700; color: var(--ink); }
+
+  .hint:hover .hint-bubble,
+  .hint:focus-within .hint-bubble{
+    opacity: 1;
+    visibility: visible;
+  }
+
   .rule-box{
     padding: 13px 14px;
     background: var(--bg);
@@ -618,6 +676,7 @@
     .modal-card{ max-width: none; border: none; border-radius: 0; min-height: 100%; }
     .modal-head, .modal-body, .modal-foot{ padding-left: 18px; padding-right: 18px; }
     .modal-fields{ grid-template-columns: 1fr; }
+    .hint-bubble{ width: min(280px, calc(100vw - 60px)); left: auto; right: -8px; }
     .modal-foot{ flex-direction: column-reverse; }
     .ghost-btn{ width: 100%; }
   }
@@ -736,9 +795,11 @@
           </div>
 
           <div class="field field-wide">
-            <label>Редиректная ссылка — соберётся по правилам</label>
+            <label>Редиректная ссылка — соберётся по правилам<span class="hint">
+              <button type="button" class="hint-btn" aria-label="Как собирается ссылка">?</button>
+              <span class="hint-bubble" role="tooltip">Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт. Раздел берётся из целевой страницы, дефисы удаляются.</span>
+            </span></label>
             <div class="rule-box" id="reqRedirect"></div>
-            <p class="rule-hint">Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт. Раздел берётся из целевой страницы, дефисы удаляются.</p>
           </div>
         </div>
 
@@ -818,9 +879,9 @@ const SECTIONS = {
   "populyarnye-instrumenty":   "Популярные инструменты",
   "mt4":                       "MT4",
   "stp-ndd":                   "STP/NDD",
-  "swap-free":                 "Swap Free",
+  "swap-free":                 "Swap-Free Islamic Account",
   "strahovanie-scheta":        "Страхование счёта",
-  "ubytok-na-schete":          "Убыток на счёте"
+  "perehod-ot-brokera":        "Переход от другого брокера"
 };
 
 const PLACEMENTS = {
@@ -940,8 +1001,8 @@ const LINKS = [
   { resource:"site", section:"swap-free",                 locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-islamic", target:"https://en.npbmarkets.online/islamic-account" },
   { resource:"site", section:"strahovanie-scheta",        locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-insurance", target:"https://ru.npbmarkets.online/insurance" },
   { resource:"site", section:"strahovanie-scheta",        locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-insurance", target:"https://en.npbmarkets.online/insurance" },
-  { resource:"site", section:"ubytok-na-schete",          locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-transfer", target:"https://ru.npbmarkets.online/transfer-account" },
-  { resource:"site", section:"ubytok-na-schete",          locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-transfer", target:"https://en.npbmarkets.online/transfer-account" },
+  { resource:"site", section:"perehod-ot-brokera",        locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/ru-transfer", target:"https://ru.npbmarkets.online/transfer-account" },
+  { resource:"site", section:"perehod-ot-brokera",        locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-transfer", target:"https://en.npbmarkets.online/transfer-account" },
 
   // Другое (Универсальная ссылка) — личный кабинет
   { resource:"lk", section:"glavnaya-stranica",         locale:"en",                              placement:"other", url:"https://npb.markets-official.com/myen", target:"http://my1.npbaccount.org/" },

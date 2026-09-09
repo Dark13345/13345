@@ -1087,6 +1087,14 @@ const REDIRECT_LOCALES = ["ru", "en"];
    Адрес страницы внутри локали тот же, что у русской версии. */
 const SITE_LOCALE_HOSTS = { ar: "ar", id: "id", ms: "ms", ua: "ua", uz: "uz", vn: "vi" };
 
+/* Пути в кабинете, которых нет в таблице: там у раздела только код редиректа
+   вроде /ru-mywithdraw, а настоящий адрес страницы взять неоткуда.
+   Заполняется вручную, по подтверждению ответственного. */
+const LK_PATHS = {
+  "vyvod-sredstv": "/billing/withdraw",
+  "cashback":      "/register/cashback"
+};
+
 // кому уходят заявки на новые редиректные ссылки
 const REQUEST_CONTACT = {
   name: "artur.molov",
@@ -1253,6 +1261,8 @@ function mainLkHost(){
 
 // путь страницы раздела внутри кабинета
 function lkPathFor(section){
+  if(LK_PATHS[section]) return LK_PATHS[section];
+
   const main = mainLkHost();
 
   // 1) из целевой страницы, если она ведёт в сам кабинет

@@ -644,6 +644,8 @@
 
   .rule-hint b{ font-weight: 700; color: var(--ink-2); }
 
+  .rule-hint.warn{ color: #B25E00; }
+
   .req-text-row{ margin-top: 22px; }
 
   .req-text{
@@ -1742,8 +1744,20 @@ function updateRequest(){
       if(detected && detected !== reqResource.value){
         reqResource.value = detected;
         reqResourceHint.textContent = "Ресурс уточнён по целевой странице: " + RESOURCES[detected] + ".";
-        reqResourceHint.classList.remove("hidden");
+        reqResourceHint.classList.remove("hidden", "warn");
       }
+    }
+  }
+
+  // сотрудник выбрал ресурс сам, а адрес говорит другое — не переучиваем, но предупреждаем
+  const typedTarget = reqTarget.value.trim();
+  if(typedTarget && resourceTouched){
+    const detected = resourceByTarget(typedTarget);
+    if(detected && detected !== reqResource.value){
+      reqResourceHint.textContent = "Адрес ведёт на «" + RESOURCES[detected] +
+        "», а выбран «" + RESOURCES[reqResource.value] + "». Проверьте: от этого зависит «my» в ссылке.";
+      reqResourceHint.classList.remove("hidden");
+      reqResourceHint.classList.add("warn");
     }
   }
 
@@ -2036,7 +2050,7 @@ function rowsFromSheet(text){
     sections[sc] = secTitle;
     placements[p] = plTitle;
 
-    const row = { resource: r, section: sc, locale: locale, placement: p, url: url };
+    const row = { resource: r, section: sc, locale: locale, placement: p, url: url, line: index + 2 };
     const target = cell(iTarget);
     if(target) row.target = target;
     if(cell(iType).toLowerCase().indexOf("прям") === 0) row.direct = true;
@@ -2044,6 +2058,35 @@ function rowsFromSheet(text){
   });
 
   if(!links.length) return null;
+
+  // ресурс должен сходиться с доменом целевой страницы: my1.npbaccount.org — кабинет,
+  // npbmarkets.online — сайт. Кто чей, определяем по самой таблице, а не по списку в коде
+  const byHost = {};
+  links.forEach(row => {
+    if(!row.target) return;
+    const host = row.target.replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
+    byHost[host] = byHost[host] || {};
+    byHost[host][row.resource] = (byHost[host][row.resource] || 0) + 1;
+  });
+
+  const hostOwner = {};
+  Object.keys(byHost).forEach(host => {
+    const counts = byHost[host];
+    const kinds = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    const total = kinds.reduce((sum, k) => sum + counts[k], 0);
+    // судим только по домену, который встречается достаточно часто и почти всегда с одним ресурсом
+    if(total >= 3 && counts[kinds[0]] / total >= 0.9) hostOwner[host] = kinds[0];
+  });
+
+  const mismatched = [];
+  links.forEach(row => {
+    if(!row.target) return;
+    const host = row.target.replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
+    const owner = hostOwner[host];
+    if(owner && owner !== row.resource){
+      mismatched.push({ line: row.line, was: row.resource, should: owner });
+    }
+  });
 
   // порядок как в резервной копии, новое — в конец
   const ordered = (source, fromSheet) => {
@@ -2059,6 +2102,7 @@ function rowsFromSheet(text){
     PLACEMENTS: ordered(FALLBACK.PLACEMENTS, placements),
     LINKS: links,
     skipped: skipped,
+    mismatched: mismatched,
   };
 }
 
@@ -2090,13 +2134,24 @@ async function loadSheet(){
     lastLoadAt = Date.now();
 
     const base = "Ссылок в справочнике: <b>" + ROWS.length + "</b> · обновлено из таблицы в " + timeNow();
+    const notes = [];
+
     if(data.skipped.length){
       const list = data.skipped.slice(0, 10).join(", ") + (data.skipped.length > 10 ? " и другие" : "");
-      showStatus(base + "<br>В таблице пропущено строк: <b>" + data.skipped.length +
-                 "</b> (№ " + list + ") — они заполнены не до конца и в сервис не попали.", true);
-    }else{
-      showStatus(base, false);
+      notes.push("В таблице пропущено строк: <b>" + data.skipped.length +
+                 "</b> (№ " + list + ") — они заполнены не до конца и в сервис не попали.");
     }
+
+    if(data.mismatched.length){
+      const list = data.mismatched.slice(0, 6).map(m =>
+        "№ " + m.line + " (указан «" + (RESOURCES[m.was] || m.was) +
+        "», а целевая страница ведёт на «" + (RESOURCES[m.should] || m.should) + "»)"
+      ).join(", ");
+      notes.push("Ресурс не сходится с целевой страницей: <b>" + data.mismatched.length +
+                 "</b> строк — " + list + (data.mismatched.length > 6 ? " и другие" : "") + ".");
+    }
+
+    showStatus(notes.length ? base + "<br>" + notes.join("<br>") : base, notes.length > 0);
   }catch(e){
     showStatus("Таблица сейчас недоступна — показан справочник от " + FALLBACK_DATE +
                ". Ссылки рабочие, но новые правки в таблице пока не видны.", true);

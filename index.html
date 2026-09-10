@@ -343,6 +343,17 @@
     color: #05604C;
   }
 
+  .data-status{
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-4);
+  }
+
+  .data-status.warn{ color: #B25E00; }
+
+  .data-status b{ font-weight: 700; }
+
   .ask-row{
     margin: 18px 0 0;
     text-align: center;
@@ -819,6 +830,8 @@
 
   </div>
 
+  <p class="data-status" id="dataStatus"></p>
+
   <p class="ask-row">
     <button type="button" class="ask-btn" id="askBtn">Не нашли нужную ссылку?</button>
   </p>
@@ -908,12 +921,21 @@
      note      — необязательная подсказка, показывается под ссылкой
    ============================================================ */
 
-const RESOURCES = {
+/* Справочник ссылок берётся из Google Таблицы. Копия ниже — резервная:
+   она показывается, пока таблица грузится, и остаётся, если таблица
+   недоступна (нет интернета, страницу открыли файлом с диска, публикацию
+   отключили). Копия обновляется только при пересборке файла. */
+
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRy-AVpnYMyVGf3PUl3-5y-N0pzAH-RUxFjJrOff0WviRG4UhGqQLEe4nNhzzaHlWaskiHltscsUcPp/pub?gid=1275631919&single=true&output=csv";
+const FALLBACK_DATE = "10.09.2026";
+
+const FALLBACK = {
+  RESOURCES: {
   lk:   "Личный кабинет",
   site: "Корпоративный сайт"
-};
+},
 
-const SECTIONS = {
+  SECTIONS: {
   "glavnaya-stranica":         "Главная страница",
   "registraciya":              "Регистрация",
   "vosstanovlenie-parolya":    "Восстановление пароля",
@@ -950,16 +972,16 @@ const SECTIONS = {
   "swap-free":                 "Swap-Free Islamic Account",
   "strahovanie-scheta":        "Страхование счёта",
   "perehod-ot-brokera":        "Переход от другого брокера"
-};
+},
 
-const PLACEMENTS = {
+  PLACEMENTS: {
   email:     "В email-рассылке",
   landing:   "На сайте и лендинге",
   media:     "Медиабаинг: лендинги и чат-боты",
   other:     "Другое (Универсальная ссылка)"
-};
+},
 
-const LINKS = [
+  LINKS: [
 // В email-рассылке — корпоративный сайт
   { resource:"site", section:"glavnaya-stranica",         locale:"ru",                              placement:"email", url:"https://npb-markets.global/ru", target:"https://ru.npbmarkets.online/" },
   { resource:"site", section:"glavnaya-stranica",         locale:"en",                              placement:"email", url:"https://npb-markets.global/en", target:"https://en.npbmarkets.online/" },
@@ -1080,9 +1102,9 @@ const LINKS = [
   { resource:"lk", section:"konkursy",                  locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-mycontests", target:"https://my1.npbaccount.org/contests" },
   { resource:"lk", section:"analiticheskiy-portal",     locale:"ru",                              placement:"other", url:"https://npb.markets-official.com/analytics-portal-ru", target:"https://npbfx.clawshorns.com/" },
   { resource:"lk", section:"analiticheskiy-portal",     locale:"en",                              placement:"other", url:"https://npb.markets-official.com/en-myanalyticsportal", target:"https://npbfx.clawshorns.com/" },
-];
+],
 
-const LOCALES = [
+  LOCALES: [
   { code:"ru", title:"RU", caption:"русский" },
   { code:"en", title:"EN", caption:"английский" },
   { code:"es", title:"ES", caption:"испанский" },
@@ -1093,14 +1115,28 @@ const LOCALES = [
   { code:"fa", title:"FA", caption:"фарси" },
   { code:"vn", title:"VN", caption:"вьетнамский" },
   { code:"id", title:"ID", caption:"индонезийский" }
-];
+],
+};
+
+// Актуальные данные: сначала резервные, после загрузки таблицы — из неё
+let RESOURCES  = FALLBACK.RESOURCES;
+let SECTIONS   = FALLBACK.SECTIONS;
+let PLACEMENTS = FALLBACK.PLACEMENTS;
+let LINKS      = FALLBACK.LINKS;
+let LOCALES    = FALLBACK.LOCALES;
 
 // Строки со списком локалей разворачиваем в записи по одной локали
 const ROWS = [];
-LINKS.forEach(row => {
-  const list = Array.isArray(row.locale) ? row.locale : [row.locale];
-  list.forEach(code => ROWS.push(Object.assign({}, row, { locale: code })));
-});
+
+function expandRows(){
+  ROWS.length = 0;
+  LINKS.forEach(row => {
+    const list = Array.isArray(row.locale) ? row.locale : [row.locale];
+    list.forEach(code => ROWS.push(Object.assign({}, row, { locale: code })));
+  });
+}
+
+expandRows();
 
 /* ============================================================
    Дальше — механика. Правится редко.
@@ -1354,11 +1390,10 @@ function restoreChoice(){
   }
 }
 
-// --- сборка полей: вызывается один раз, когда справочник расшифрован ---
+// --- поля формы: перерисовываются каждый раз, когда меняются данные ---
 
-function buildFields(){
-  fillSelect(resourceSelect, optionsFor("resource", {}), RESOURCES, false);
-
+function renderFields(){
+  fillSelect(resourceSelect, optionsFor("resource", {}), RESOURCES, true);
   localeGrid.innerHTML = "";
   LOCALES.forEach((loc, index) => {
     const wrap = document.createElement("label");
@@ -1372,13 +1407,21 @@ function buildFields(){
     localeGrid.appendChild(wrap);
   });
 
+  refreshChain();
+  restoreChoice();
+}
+
+// обработчики вешаются один раз за всё время жизни страницы
+function bindEvents(){
   resourceSelect.addEventListener("change", refreshChain);
   sectionSelect.addEventListener("change", refreshChain);
   localeGrid.addEventListener("change", refreshChain);
   placementSelect.addEventListener("change", resetResult);
+}
 
-  refreshChain();
-  restoreChoice();
+function buildFields(){
+  bindEvents();
+  renderFields();
 }
 
 generateBtn.addEventListener("click", () => {
@@ -1905,6 +1948,151 @@ onCopyPress(reqCopyMini, async () => {
 });
 
 buildRequestFields();
+/* ============================================================
+   Google Таблица как источник данных.
+   Читаем опубликованный CSV, собираем из него справочник.
+   Если не получилось — молча остаёмся на резервной копии.
+   ============================================================ */
+
+const dataStatus = document.getElementById("dataStatus");
+let lastLoadAt = 0;
+
+// CSV с кавычками и переводами строк внутри ячеек
+function parseCsv(text){
+  const rows = [];
+  let row = [], value = "", quoted = false;
+
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if(quoted){
+      if(ch === '"'){
+        if(text[i + 1] === '"'){ value += '"'; i++; }
+        else quoted = false;
+      }else value += ch;
+      continue;
+    }
+    if(ch === '"'){ quoted = true; }
+    else if(ch === ","){ row.push(value); value = ""; }
+    else if(ch === "\n"){ row.push(value); rows.push(row); row = []; value = ""; }
+    else if(ch !== "\r"){ value += ch; }
+  }
+  row.push(value);
+  rows.push(row);
+  return rows;
+}
+
+// названия из таблицы -> внутренние ключи; для новых делаем ключ из названия
+function keyMaker(dictionary){
+  const known = {};
+  Object.keys(dictionary).forEach(key => { known[dictionary[key].toLowerCase().trim()] = key; });
+  return title => {
+    const clean = String(title || "").trim();
+    if(!clean) return "";
+    const found = known[clean.toLowerCase()];
+    if(found) return found;
+    return "x-" + clean.toLowerCase().replace(/[^0-9a-zа-яё]+/gi, "-").replace(/^-|-$/g, "");
+  };
+}
+
+function rowsFromSheet(text){
+  const table = parseCsv(text);
+  if(!table.length) return null;
+
+  const header = table[0].map(h => h.trim().toLowerCase());
+  const at = name => header.indexOf(name);
+  const iRes = at("ресурс"), iSec = at("раздел"), iLoc = at("локаль"),
+        iPl = at("назначение"), iUrl = at("ссылка"),
+        iTarget = at("целевая страница"), iType = at("тип");
+
+  if(iRes < 0 || iSec < 0 || iLoc < 0 || iPl < 0 || iUrl < 0) return null;
+
+  const resKey = keyMaker(FALLBACK.RESOURCES);
+  const secKey = keyMaker(FALLBACK.SECTIONS);
+  const plKey  = keyMaker(FALLBACK.PLACEMENTS);
+  const localeCodes = {};
+  FALLBACK.LOCALES.forEach(l => { localeCodes[l.title.toLowerCase()] = l.code; });
+
+  const links = [];
+  const sections = {}, placements = {}, resources = {};
+
+  table.slice(1).forEach(cells => {
+    const cell = i => (i >= 0 && cells[i] ? String(cells[i]).trim() : "");
+    const url = cell(iUrl);
+    const resTitle = cell(iRes), secTitle = cell(iSec),
+          locTitle = cell(iLoc), plTitle = cell(iPl);
+    if(!url || !resTitle || !secTitle || !locTitle || !plTitle) return;
+
+    const locale = localeCodes[locTitle.toLowerCase()] || locTitle.toLowerCase();
+    const r = resKey(resTitle), sc = secKey(secTitle), p = plKey(plTitle);
+
+    resources[r] = resTitle;
+    sections[sc] = secTitle;
+    placements[p] = plTitle;
+
+    const row = { resource: r, section: sc, locale: locale, placement: p, url: url };
+    const target = cell(iTarget);
+    if(target) row.target = target;
+    if(cell(iType).toLowerCase().indexOf("прям") === 0) row.direct = true;
+    links.push(row);
+  });
+
+  if(!links.length) return null;
+
+  // порядок как в резервной копии, новое — в конец
+  const ordered = (source, fromSheet) => {
+    const out = {};
+    Object.keys(source).forEach(key => { if(fromSheet[key]) out[key] = fromSheet[key]; });
+    Object.keys(fromSheet).forEach(key => { if(!out[key]) out[key] = fromSheet[key]; });
+    return out;
+  };
+
+  return {
+    RESOURCES: ordered(FALLBACK.RESOURCES, resources),
+    SECTIONS: ordered(FALLBACK.SECTIONS, sections),
+    PLACEMENTS: ordered(FALLBACK.PLACEMENTS, placements),
+    LINKS: links,
+  };
+}
+
+function showStatus(text, warn){
+  dataStatus.innerHTML = text;
+  dataStatus.classList.toggle("warn", !!warn);
+}
+
+function timeNow(){
+  const d = new Date();
+  return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+}
+
+async function loadSheet(){
+  try{
+    const res = await fetch(SHEET_URL + "&_=" + Date.now(), { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = rowsFromSheet(await res.text());
+    if(!data) throw new Error("не разобрали таблицу");
+
+    RESOURCES = data.RESOURCES;
+    SECTIONS = data.SECTIONS;
+    PLACEMENTS = data.PLACEMENTS;
+    LINKS = data.LINKS;
+    expandRows();
+
+    renderFields();
+    buildRequestFields();
+    lastLoadAt = Date.now();
+    showStatus("Ссылок в справочнике: <b>" + ROWS.length + "</b> · обновлено из таблицы в " + timeNow(), false);
+  }catch(e){
+    showStatus("Таблица сейчас недоступна — показан справочник от " + FALLBACK_DATE +
+               ". Ссылки рабочие, но новые правки в таблице пока не видны.", true);
+  }
+}
+
+// свежие данные при открытии и при возвращении на вкладку, но не чаще раза в две минуты
+loadSheet();
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden && Date.now() - lastLoadAt > 120000) loadSheet();
+});
+
 </script>
 
 </body>

@@ -2014,13 +2014,20 @@ function rowsFromSheet(text){
 
   const links = [];
   const sections = {}, placements = {}, resources = {};
+  const skipped = [];
 
-  table.slice(1).forEach(cells => {
+  table.slice(1).forEach((cells, index) => {
     const cell = i => (i >= 0 && cells[i] ? String(cells[i]).trim() : "");
     const url = cell(iUrl);
     const resTitle = cell(iRes), secTitle = cell(iSec),
           locTitle = cell(iLoc), plTitle = cell(iPl);
-    if(!url || !resTitle || !secTitle || !locTitle || !plTitle) return;
+
+    if(!url || !resTitle || !secTitle || !locTitle || !plTitle){
+      // совсем пустая строка — это просто разделитель, а начатая и брошенная — ошибка
+      const started = [url, resTitle, secTitle, locTitle, plTitle].some(Boolean);
+      if(started) skipped.push(index + 2);   // номер строки в самой таблице
+      return;
+    }
 
     const locale = localeCodes[locTitle.toLowerCase()] || locTitle.toLowerCase();
     const r = resKey(resTitle), sc = secKey(secTitle), p = plKey(plTitle);
@@ -2051,6 +2058,7 @@ function rowsFromSheet(text){
     SECTIONS: ordered(FALLBACK.SECTIONS, sections),
     PLACEMENTS: ordered(FALLBACK.PLACEMENTS, placements),
     LINKS: links,
+    skipped: skipped,
   };
 }
 
@@ -2080,7 +2088,15 @@ async function loadSheet(){
     renderFields();
     buildRequestFields();
     lastLoadAt = Date.now();
-    showStatus("Ссылок в справочнике: <b>" + ROWS.length + "</b> · обновлено из таблицы в " + timeNow(), false);
+
+    const base = "Ссылок в справочнике: <b>" + ROWS.length + "</b> · обновлено из таблицы в " + timeNow();
+    if(data.skipped.length){
+      const list = data.skipped.slice(0, 10).join(", ") + (data.skipped.length > 10 ? " и другие" : "");
+      showStatus(base + "<br>В таблице пропущено строк: <b>" + data.skipped.length +
+                 "</b> (№ " + list + ") — они заполнены не до конца и в сервис не попали.", true);
+    }else{
+      showStatus(base, false);
+    }
   }catch(e){
     showStatus("Таблица сейчас недоступна — показан справочник от " + FALLBACK_DATE +
                ". Ссылки рабочие, но новые правки в таблице пока не видны.", true);

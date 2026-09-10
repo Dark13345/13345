@@ -1688,6 +1688,23 @@ function findExact(){
 function updateRequest(){
   const guess = resolveSection(reqSection.value);
   const sectionKey = guess.key;
+
+  if(!targetTouched){
+    const suggested = targetFor(sectionKey, reqResource.value, reqLocale.value);
+    if(reqTarget.value !== suggested) reqTarget.value = suggested;
+
+    // раздел может жить только на сайте или только в кабинете — адрес это покажет
+    if(suggested && !resourceTouched){
+      const detected = resourceByTarget(suggested);
+      if(detected && detected !== reqResource.value){
+        reqResource.value = detected;
+        reqResourceHint.textContent = "Ресурс уточнён по целевой странице: " + RESOURCES[detected] + ".";
+        reqResourceHint.classList.remove("hidden");
+      }
+    }
+  }
+
+  // теперь, когда ресурс уточнён, ищем готовую ссылку
   const exact = findExact();
 
   // варианты под полем — когда написали не слово в слово
@@ -1733,20 +1750,6 @@ function updateRequest(){
     }
   }
 
-  if(!targetTouched){
-    const suggested = targetFor(sectionKey, reqResource.value, reqLocale.value);
-    if(reqTarget.value !== suggested) reqTarget.value = suggested;
-
-    // раздел может жить только на сайте или только в кабинете — адрес это покажет
-    if(suggested && !resourceTouched){
-      const detected = resourceByTarget(suggested);
-      if(detected && detected !== reqResource.value){
-        reqResource.value = detected;
-        reqResourceHint.textContent = "Ресурс уточнён по целевой странице: " + RESOURCES[detected] + ".";
-        reqResourceHint.classList.remove("hidden");
-      }
-    }
-  }
 
   const built = buildRedirect(sectionKey);
   const redirect = built.url;

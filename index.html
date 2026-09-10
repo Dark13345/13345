@@ -457,6 +457,33 @@
     color: #05604C;
   }
 
+  .copy-inline{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: 8px;
+    padding: 0;
+    vertical-align: -7px;
+    border: 1px solid var(--green-line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--green-dark);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .copy-inline:hover{
+    border-color: var(--green);
+    background: var(--green-soft);
+  }
+
+  .copy-inline .icon-done{ display: none; }
+  .copy-inline.copied .icon-copy{ display: none; }
+  .copy-inline.copied .icon-done{ display: block; }
+  .copy-inline.copied{ background: var(--green); border-color: var(--green); color: #FFFFFF; }
+
   .check ul{
     margin: 6px 0 0;
     padding-left: 18px;
@@ -1679,13 +1706,18 @@ function updateRequest(){
   }
 
   const understood = (sectionKey && !guess.exact)
-    ? "Понял как «" + SECTIONS[sectionKey] + "». "
+    ? "Возможно, вы имели в виду «" + SECTIONS[sectionKey] + "». "
     : "";
 
   if(exact){
     reqCheck.className = "check found";
     reqCheck.innerHTML = understood + "<b>Такая ссылка уже есть.</b> Заявка не нужна — скопируйте её:" +
-      '<span class="check-link">' + exact.url + "</span>";
+      '<span class="check-link">' + exact.url +
+        '<button type="button" class="copy-inline" data-url="' + exact.url + '" ' +
+        'aria-label="Скопировать ссылку" title="Скопировать ссылку">' +
+          '<svg class="icon-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
+          '<svg class="icon-done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>' +
+        "</button></span>";
   }else{
     const groups = sectionKey ? describeSection(sectionKey) : [];
     if(groups.length){
@@ -1815,6 +1847,15 @@ document.addEventListener("keydown", event => {
 
   updateRequest();
 }));
+
+reqCheck.addEventListener("mousedown", event => {
+  const button = event.target.closest(".copy-inline");
+  if(!button) return;
+  event.preventDefault();
+  copyToClipboard(button.dataset.url);
+  button.classList.add("copied");
+  setTimeout(() => button.classList.remove("copied"), 1800);
+});
 
 reqSuggest.addEventListener("mousedown", event => {
   const button = event.target.closest(".suggest-btn");

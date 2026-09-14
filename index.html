@@ -1065,7 +1065,7 @@
           <div class="field field-wide">
             <label>Редиректная ссылка — соберётся по правилам<span class="hint">
               <button type="button" class="hint-btn" aria-label="Как собирается ссылка">?</button>
-              <span class="hint-bubble" role="tooltip">Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт. Раздел берётся из целевой страницы, дефисы удаляются.</span>
+              <span class="hint-bubble" role="tooltip">Путь после домена у одной страницы одинаков на всех доменах. Если у страницы он уже есть в таблице — берётся он. Если нет — собирается по схеме Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт, раздел — из целевой страницы, дефисы удаляются.</span>
             </span></label>
             <div class="rule-box" id="reqRedirect"></div>
           </div>
@@ -1345,6 +1345,144 @@ let PLACEMENTS = FALLBACK.PLACEMENTS;
 let LINKS      = FALLBACK.LINKS;
 let LOCALES    = FALLBACK.LOCALES;
 
+/* Ссылки «домен задачи + путь страницы», которых нет в таблице.
+   Путь после домена обозначает конечную страницу и одинаков на всех доменах,
+   поэтому недостающую ссылку можно собрать из уже известного пути. Каждая ссылка
+   ниже проверена вживую 14.09.2026: ведёт на ту же страницу, что и ссылка из таблицы
+   с тем же путём. Непроверенные сюда не попадают. Ссылка из таблицы всегда главнее. */
+const VERIFIED_DATE = "14.09.2026";
+const VERIFIED_LINKS = [
+  { res:"Корпоративный сайт", sec:"Калькулятор", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-calculator" },
+  { res:"Корпоративный сайт", sec:"Пополнить счёт", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-deposit" },
+  { res:"Корпоративный сайт", sec:"Вывод средств", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-withdrawal" },
+  { res:"Корпоративный сайт", sec:"Подарки за сделки", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-loyalty" },
+  { res:"Корпоративный сайт", sec:"Аналитический портал", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-analytic" },
+  { res:"Корпоративный сайт", sec:"О компании", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-about" },
+  { res:"Корпоративный сайт", sec:"Контакты", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-contacts" },
+  { res:"Корпоративный сайт", sec:"Документы", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-documents" },
+  { res:"Корпоративный сайт", sec:"Лицензии и регулирование", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-regulation" },
+  { res:"Корпоративный сайт", sec:"Партнёрство", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-partnership" },
+  { res:"Корпоративный сайт", sec:"Новости", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-news" },
+  { res:"Корпоративный сайт", sec:"Вебинары", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-webinars" },
+  { res:"Корпоративный сайт", sec:"Торговые счета", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-accounts" },
+  { res:"Корпоративный сайт", sec:"Сравнение торговых счетов", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-account-types" },
+  { res:"Корпоративный сайт", sec:"Учебные счета", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-demo" },
+  { res:"Корпоративный сайт", sec:"Популярные инструменты", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-instruments" },
+  { res:"Корпоративный сайт", sec:"MetaTrader 4", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-mt4" },
+  { res:"Корпоративный сайт", sec:"STP/NDD", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-ndd" },
+  { res:"Корпоративный сайт", sec:"Swap-Free Islamic Account", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-islamic" },
+  { res:"Корпоративный сайт", sec:"Страхование счёта", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-insurance" },
+  { res:"Корпоративный сайт", sec:"Переход от другого брокера", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-transfer" },
+  { res:"Корпоративный сайт", sec:"Спецификации контрактов", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-specification" },
+  { res:"Корпоративный сайт", sec:"Пополнить счёт", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-deposit" },
+  { res:"Корпоративный сайт", sec:"Вывод средств", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-withdrawal" },
+  { res:"Корпоративный сайт", sec:"Cashback", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-cashback" },
+  { res:"Корпоративный сайт", sec:"Акция «30 лет»", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-30years" },
+  { res:"Корпоративный сайт", sec:"Подарки за сделки", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-loyalty" },
+  { res:"Корпоративный сайт", sec:"Аналитический портал", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-analytic" },
+  { res:"Корпоративный сайт", sec:"О компании", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-about" },
+  { res:"Корпоративный сайт", sec:"Контакты", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-contacts" },
+  { res:"Корпоративный сайт", sec:"Документы", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-documents" },
+  { res:"Корпоративный сайт", sec:"Лицензии и регулирование", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-regulation" },
+  { res:"Корпоративный сайт", sec:"Партнёрство", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-partnership" },
+  { res:"Корпоративный сайт", sec:"Новости", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-news" },
+  { res:"Корпоративный сайт", sec:"Торговые счета", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-accounts" },
+  { res:"Корпоративный сайт", sec:"Сравнение торговых счетов", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-account-types" },
+  { res:"Корпоративный сайт", sec:"Учебные счета", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-demo" },
+  { res:"Корпоративный сайт", sec:"Популярные инструменты", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-instruments" },
+  { res:"Корпоративный сайт", sec:"MetaTrader 4", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-mt4" },
+  { res:"Корпоративный сайт", sec:"STP/NDD", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-ndd" },
+  { res:"Корпоративный сайт", sec:"Swap-Free Islamic Account", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-islamic" },
+  { res:"Корпоративный сайт", sec:"Страхование счёта", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-insurance" },
+  { res:"Корпоративный сайт", sec:"Переход от другого брокера", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-transfer" },
+  { res:"Корпоративный сайт", sec:"Калькулятор", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-calculator" },
+  { res:"Корпоративный сайт", sec:"Спецификации контрактов", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-specification" },
+  { res:"Личный кабинет", sec:"Главная страница", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/myru" },
+  { res:"Личный кабинет", sec:"Главная страница", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/myru" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/ru-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"ru", pl:"На сайте и лендинге", url:"https://mynpb.nl/ru-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/ru-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Пополнить счёт", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/ru-mydeposit" },
+  { res:"Личный кабинет", sec:"Пополнить счёт", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/ru-mydeposit" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/ru-myplatforms" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"ru", pl:"На сайте и лендинге", url:"https://mynpb.nl/ru-myplatforms" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/ru-myplatforms" },
+  { res:"Личный кабинет", sec:"Промоакции", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/mypromoru" },
+  { res:"Личный кабинет", sec:"Конкурсы", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/ru-mycontests" },
+  { res:"Личный кабинет", sec:"Аналитический портал", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/porusupportanalytic" },
+  { res:"Личный кабинет", sec:"Регистрация", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-myregister" },
+  { res:"Личный кабинет", sec:"Регистрация", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/ru-myregister" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/ru-mywithdraw" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/ru-mywithdraw" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/ru-mywithdraw" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/cashbackrureg" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/cashbackrureg" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/cashbackrureg" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"ru", pl:"В email-рассылке", url:"https://npb-markets.global/poruaffiliatelinks" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"ru", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/poruaffiliatelinks" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"ru", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/poruaffiliatelinks" },
+  { res:"Личный кабинет", sec:"Главная страница", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/myen" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/en-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"en", pl:"На сайте и лендинге", url:"https://mynpb.nl/en-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Восстановление пароля", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/en-myrecovery_password" },
+  { res:"Личный кабинет", sec:"Пополнить счёт", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/en-mydeposit" },
+  { res:"Личный кабинет", sec:"Пополнить счёт", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/en-mydeposit" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/en-myplatforms" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"en", pl:"На сайте и лендинге", url:"https://mynpb.nl/en-myplatforms" },
+  { res:"Личный кабинет", sec:"Торговые платформы", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/en-myplatforms" },
+  { res:"Личный кабинет", sec:"Промоакции", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/mypromoen" },
+  { res:"Личный кабинет", sec:"Конкурсы", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/en-mycontests" },
+  { res:"Личный кабинет", sec:"Регистрация", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-myregister" },
+  { res:"Личный кабинет", sec:"Регистрация", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/en-myregister" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/en-mywithdraw" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/en-mywithdraw" },
+  { res:"Личный кабинет", sec:"Вывод средств", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/en-mywithdraw" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Master", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/master" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Zero", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/zero" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт Expert", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/expert" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Торговый счёт VIP", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/vip" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Demo", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/demo-master" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Учебный счёт Cent", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/trade-accounts/new/acc/standard-cent" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/cashbackenreg" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/cashbackenreg" },
+  { res:"Личный кабинет", sec:"Cashback", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/cashbackenreg" },
+  { res:"Личный кабинет", sec:"Аналитический портал", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/poensupportanalytic" },
+  { res:"Личный кабинет", sec:"Аналитический портал", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/poensupportanalytic" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"en", pl:"В email-рассылке", url:"https://npb-markets.global/poenaffiliatelinks" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"en", pl:"Другое (Универсальная ссылка)", url:"https://npb.markets-official.com/poenaffiliatelinks" },
+  { res:"Личный кабинет", sec:"Реферальные ссылки и промо", loc:"en", pl:"Медиабаинг: лендинги и чат-боты", url:"https://npbbroker.com/poenaffiliatelinks" }
+];
+
 // Строки со списком локалей разворачиваем в записи по одной локали
 const ROWS = [];
 
@@ -1353,6 +1491,41 @@ function expandRows(){
   LINKS.forEach(row => {
     const list = Array.isArray(row.locale) ? row.locale : [row.locale];
     list.forEach(code => ROWS.push(Object.assign({}, row, { locale: code })));
+  });
+  addVerifiedRows();
+}
+
+function pathOf(url){
+  return String(url || "").replace(/^https?:\/\/[^/]+\/?/i, "");
+}
+
+// добавляем проверенные ссылки, если в таблице нет своей на то же сочетание
+function addVerifiedRows(){
+  const titleKey = dict => {
+    const map = {};
+    Object.keys(dict).forEach(key => { map[String(dict[key]).toLowerCase()] = key; });
+    return map;
+  };
+  const resKey = titleKey(RESOURCES), secKey = titleKey(SECTIONS), plKey = titleKey(PLACEMENTS);
+
+  const taken = new Set();
+  const pagePaths = {};
+  ROWS.forEach(row => {
+    taken.add([row.resource, row.section, row.locale, row.placement].join("|"));
+    if(row.direct) return;
+    const page = [row.resource, row.section, row.locale].join("|");
+    (pagePaths[page] = pagePaths[page] || new Set()).add(pathOf(row.url));
+  });
+
+  VERIFIED_LINKS.forEach(v => {
+    const r = resKey[v.res.toLowerCase()], sc = secKey[v.sec.toLowerCase()], p = plKey[v.pl.toLowerCase()];
+    if(!r || !sc || !p) return;                                  // раздела или задачи больше нет в таблице
+    const combo = [r, sc, v.loc, p].join("|");
+    if(taken.has(combo)) return;                                 // своя ссылка в таблице главнее
+    const paths = pagePaths[[r, sc, v.loc].join("|")];
+    if(!paths || !paths.has(pathOf(v.url))) return;              // путь страницы в таблице поменяли — не подставляем старый
+    ROWS.push({ resource: r, section: sc, locale: v.loc, placement: p, url: v.url, generated: true });
+    taken.add(combo);
   });
 }
 
@@ -1668,12 +1841,17 @@ generateBtn.addEventListener("click", () => {
   resultBox.textContent = row.url;
   resultBox.className = "result-box";
   resultStatus.textContent = RESOURCES[row.resource] + " · " + SECTIONS[row.section] +
-    " · " + row.locale.toUpperCase() + (row.direct ? " · прямая" : "");
+    " · " + row.locale.toUpperCase() +
+    (row.direct ? " · прямая" : (row.generated ? " · по правилу" : ""));
   copyBtn.disabled = false;
   copyBtn.classList.remove("copied");
   copyLabel.textContent = "Скопировать";
 
   const notes = [];
+  if(row.generated){
+    notes.push("Этой ссылки нет в таблице: она собрана по правилу «домен задачи + путь страницы» " +
+               "и проверена " + VERIFIED_DATE + " — ведёт на ту же страницу, что и ссылка из таблицы.");
+  }
   if(row.direct){
     notes.push("Это прямая ссылка: на локали " + row.locale.toUpperCase() +
                " сайт не блокируется, редирект не нужен.");
@@ -1912,6 +2090,21 @@ function slugFromSection(sectionKey, resource){
   return /^(ru|en)[-_]/i.test(path) ? slugFromUrl(source.url) : "";
 }
 
+// путь, который у страницы уже есть в таблице: он одинаков для всех доменов
+function knownPathFor(sectionKey, resource, locale){
+  if(!sectionKey) return "";
+  const count = {};
+  ROWS.forEach(row => {
+    if(row.generated || row.direct) return;
+    if(row.resource !== resource || row.section !== sectionKey || row.locale !== locale) return;
+    const p = pathOf(row.url);
+    if(p) count[p] = (count[p] || 0) + 1;
+  });
+  const standard = p => /^(ru|en)(-|$)/.test(p) || /^my(ru|en)$/.test(p);
+  return Object.keys(count).sort((a, b) =>
+    (standard(b) - standard(a)) || (count[b] - count[a]))[0] || "";
+}
+
 function buildRedirect(sectionKey){
   const domain = domainFor(reqPlacement.value, reqResource.value);
   if(!domain){
@@ -1919,6 +2112,10 @@ function buildRedirect(sectionKey){
       PLACEMENTS[reqPlacement.value] + "» редиректных ссылок в справочнике нет — " +
       "проверьте назначение." };
   }
+
+  // у страницы уже есть путь в таблице — берём его, домен меняется по задаче
+  const known = knownPathFor(sectionKey, reqResource.value, reqLocale.value);
+  if(known) return { url: "https://" + domain + "/" + known, reason: "" };
 
   const isHome = sectionKey === "glavnaya-stranica";
   const target = reqTarget.value.trim();
@@ -2354,8 +2551,9 @@ async function loadSheet(){
     buildRequestFields();
     lastLoadAt = Date.now();
 
-    const base = "<b>Справочник в порядке.</b><br>Ссылок: " + ROWS.length +
-      " · обновлено из таблицы в " + timeNow();
+    const fromRule = ROWS.filter(r => r.generated).length;
+    const counts = "Ссылок из таблицы: " + (ROWS.length - fromRule) + " · собрано по правилу: " + fromRule;
+    const base = "<b>Справочник в порядке.</b><br>" + counts + "<br>Обновлено из таблицы в " + timeNow();
     const notes = [];
 
     if(data.skipped.length){
@@ -2374,8 +2572,8 @@ async function loadSheet(){
     }
 
     if(notes.length){
-      showStatus("<b>Нужно поправить таблицу.</b><br>Ссылок: " + ROWS.length +
-                 " · обновлено в " + timeNow() + "<br>" + notes.join("<br>"), true);
+      showStatus("<b>Нужно поправить таблицу.</b><br>" + counts +
+                 "<br>Обновлено в " + timeNow() + "<br>" + notes.join("<br>"), true);
     }else{
       showStatus(base, false);
     }

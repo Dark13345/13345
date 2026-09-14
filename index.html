@@ -94,8 +94,7 @@
   }
 
   /* Значок состояния справочника: зелёный — всё в порядке, жёлтый — есть замечания.
-     Объём — градиентом и бликом, жизнь — движением шара, бегущим бликом и свечением.
-     Весит меньше килобайта и остаётся чётким на любом экране. */
+     Объём — градиентом и бликом. Без анимации, чтобы не отвлекать от работы. */
   .health{
     position: relative;
     display: inline-flex;
@@ -110,16 +109,7 @@
     overflow: visible;
   }
 
-  .health-body,
-  .health-ring,
-  .health-shadow{
-    transform-box: view-box;
-  }
-
-  .health-body{ transform-origin: 20px 19px; }
-  .health-ring{ transform-origin: 20px 19px; fill: none; stroke-width: 2.2; opacity: 0; }
-  .health-shadow{ transform-origin: 20px 35.5px; fill: rgba(15, 23, 42, 0.2); }
-  .health-shine{ transform-box: view-box; }
+  .health-shadow{ fill: rgba(15, 23, 42, 0.18); }
 
   .health-mark{
     fill: none;
@@ -132,93 +122,22 @@
 
   .mark-warn circle{ fill: #FFFFFF; stroke: none; }
 
-  /* --- всё хорошо: плавно парит, по шару пробегает блик, мягко светится --- */
+  /* всё хорошо */
   .health.ok .stop-light{ stop-color: #7BEBCD; }
   .health.ok .stop-mid{ stop-color: #16B68F; }
   .health.ok .stop-dark{ stop-color: #006E56; }
-  .health.ok .mark-ok{ opacity: 1; animation: markIn 0.5s ease-out both; }
-  .health.ok .health-body{ animation: float 3s ease-in-out infinite; }
-  .health.ok .health-shadow{ animation: shadowFloat 3s ease-in-out infinite; }
-  .health.ok .health-shine{ animation: shine 3.6s ease-in-out infinite; }
-  .health.ok .health-icon{ animation: glowOk 3s ease-in-out infinite; }
+  .health.ok .mark-ok{ opacity: 1; }
 
-  /* --- есть замечания: подпрыгивает и качается, расходится кольцо, светится ярче --- */
+  /* есть замечания */
   .health.warn .stop-light{ stop-color: #FFE19A; }
   .health.warn .stop-mid{ stop-color: #F4A62F; }
   .health.warn .stop-dark{ stop-color: #A85300; }
   .health.warn .mark-warn{ opacity: 1; }
-  .health.warn .health-body{ animation: alarm 2s ease-in-out infinite; }
-  .health.warn .health-shadow{ animation: shadowAlarm 2s ease-in-out infinite; }
-  .health.warn .health-ring{ stroke: #F4A62F; animation: ringPulse 1.6s ease-out infinite; }
-  .health.warn .health-shine{ animation: shine 2.4s ease-in-out infinite; }
-  .health.warn .health-icon{ animation: glowWarn 1.6s ease-in-out infinite; }
 
-  /* --- пока грузим --- */
+  /* пока грузим */
   .health.loading .stop-light{ stop-color: #EEF2F6; }
   .health.loading .stop-mid{ stop-color: #CBD5E1; }
   .health.loading .stop-dark{ stop-color: #94A3B8; }
-  .health.loading .health-body{ animation: float 1.2s ease-in-out infinite; }
-  .health.loading .health-shine{ animation: shine 1.2s linear infinite; }
-
-  @keyframes float{
-    0%, 100%{ transform: translateY(0) scale(1); }
-    50%{ transform: translateY(-4px) scale(1.06); }
-  }
-
-  @keyframes shadowFloat{
-    0%, 100%{ transform: scaleX(1); opacity: 0.6; }
-    50%{ transform: scaleX(0.72); opacity: 0.28; }
-  }
-
-  @keyframes alarm{
-    0%, 48%, 100%{ transform: translateY(0) rotate(0deg); }
-    56%{ transform: translateY(-6px) rotate(-14deg); }
-    64%{ transform: translateY(-6px) rotate(14deg); }
-    72%{ transform: translateY(-3px) rotate(-9deg); }
-    80%{ transform: translateY(0) rotate(5deg); }
-    88%{ transform: translateY(0) rotate(0deg); }
-  }
-
-  @keyframes shadowAlarm{
-    0%, 48%, 88%, 100%{ transform: scaleX(1); opacity: 0.6; }
-    60%{ transform: scaleX(0.6); opacity: 0.25; }
-  }
-
-  @keyframes ringPulse{
-    0%{ transform: scale(0.92); opacity: 0.85; }
-    75%{ transform: scale(1.45); opacity: 0; }
-    100%{ transform: scale(1.45); opacity: 0; }
-  }
-
-  @keyframes shine{
-    0%{ transform: translateX(0); }
-    45%{ transform: translateX(58px); }
-    100%{ transform: translateX(58px); }
-  }
-
-  @keyframes glowOk{
-    0%, 100%{ filter: drop-shadow(0 0 0 rgba(22, 182, 143, 0)); }
-    50%{ filter: drop-shadow(0 0 6px rgba(22, 182, 143, 0.55)); }
-  }
-
-  @keyframes glowWarn{
-    0%, 100%{ filter: drop-shadow(0 0 1px rgba(244, 166, 47, 0.2)); }
-    50%{ filter: drop-shadow(0 0 9px rgba(244, 166, 47, 0.85)); }
-  }
-
-  @keyframes markIn{
-    from{ stroke-dasharray: 22; stroke-dashoffset: 22; }
-    to{ stroke-dasharray: 22; stroke-dashoffset: 0; }
-  }
-
-  /* Если в системе включено «уменьшить движение», шар не двигается,
-     но свечение продолжает пульсировать — значок всё равно выглядит живым. */
-  @media (prefers-reduced-motion: reduce){
-    .health .health-body,
-    .health .health-shadow,
-    .health .health-shine,
-    .health .health-ring{ animation: none !important; }
-  }
 
   /* подсказка с подробностями */
   .health-bubble{
@@ -943,30 +862,15 @@
             <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"></stop>
             <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
           </radialGradient>
-          <linearGradient id="healthShine" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"></stop>
-            <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.8"></stop>
-            <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
-          </linearGradient>
-          <clipPath id="healthClip"><circle cx="20" cy="19" r="13"></circle></clipPath>
         </defs>
 
         <ellipse class="health-shadow" cx="20" cy="35.5" rx="11" ry="2.6"></ellipse>
-        <circle class="health-ring" cx="20" cy="19" r="14"></circle>
-
-        <g class="health-body">
-          <circle class="health-ball" cx="20" cy="19" r="13" fill="url(#healthBall)"></circle>
-          <g clip-path="url(#healthClip)">
-            <g transform="skewX(-22)">
-              <rect class="health-shine" x="-6" y="0" width="9" height="40" fill="url(#healthShine)"></rect>
-            </g>
-          </g>
-          <ellipse class="health-gloss" cx="15.5" cy="13.5" rx="6.5" ry="4.6" fill="url(#healthGloss)"></ellipse>
-          <path class="health-mark mark-ok" d="M13.6 19.4 L18 23.6 L26.4 14.8"></path>
-          <g class="health-mark mark-warn">
-            <path d="M20 12.6 L20 20.4"></path>
-            <circle cx="20" cy="24.6" r="1.5"></circle>
-          </g>
+        <circle cx="20" cy="19" r="13" fill="url(#healthBall)"></circle>
+        <ellipse cx="15.5" cy="13.5" rx="6.5" ry="4.6" fill="url(#healthGloss)"></ellipse>
+        <path class="health-mark mark-ok" d="M13.6 19.4 L18 23.6 L26.4 14.8"></path>
+        <g class="health-mark mark-warn">
+          <path d="M20 12.6 L20 20.4"></path>
+          <circle cx="20" cy="24.6" r="1.5"></circle>
         </g>
       </svg>
       <span class="health-bubble" id="healthText"></span>

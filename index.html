@@ -1068,6 +1068,7 @@
               <span class="hint-bubble" role="tooltip">Локаль-Среда+Раздел: <b>my</b> — для личного кабинета, без <b>my</b> — корпоративный сайт. Раздел берётся из целевой страницы, дефисы удаляются.</span>
             </span></label>
             <div class="rule-box" id="reqRedirect"></div>
+            <p class="rule-hint hidden" id="reqDomainHint"></p>
           </div>
         </div>
 
@@ -1333,6 +1334,9 @@ expandRows();
 
 const REDIRECT_LOCALES = ["ru", "en"];
 
+// «Другое (Универсальная ссылка)» подходит для любой задачи, у которой нет своей ссылки
+const UNIVERSAL_PLACEMENT = "other";
+
 /* У корпоративного сайта есть локальные версии на своих поддоменах:
    ar/id/ms/ua/uz те же, а вьетнамская — vi (не vn). Испанской и персидской
    версий сайта нет, для них прямой ссылки не существует.
@@ -1424,7 +1428,12 @@ function refreshChain(){
     if(first) first.checked = true;
   }
 
-  const placementKeys = optionsFor("placement", { resource, section });
+  // если у раздела есть универсальная ссылка, подходит любое назначение:
+  // там, где своей ссылки нет, отдадим универсальную
+  let placementKeys = optionsFor("placement", { resource, section });
+  if(placementKeys.includes(UNIVERSAL_PLACEMENT)){
+    placementKeys = Object.keys(PLACEMENTS);
+  }
   fillSelect(placementSelect, placementKeys, PLACEMENTS, true);
 
   fieldSection.classList.toggle("is-locked", sectionKeys.length === 0);
@@ -1458,6 +1467,17 @@ function findLink(){
     row.placement === placement
   );
   if(exact) return exact;
+
+  // специальной ссылки под эту задачу нет — подходит универсальная
+  if(REDIRECT_LOCALES.includes(locale) && placement !== UNIVERSAL_PLACEMENT){
+    const universal = ROWS.find(row =>
+      row.resource === resource &&
+      row.section === section &&
+      row.locale === locale &&
+      row.placement === UNIVERSAL_PLACEMENT
+    );
+    if(universal) return Object.assign({}, universal, { universalFor: placement });
+  }
 
   // прямая ссылка — это просто адрес страницы, он одинаков независимо
   // от того, куда сотрудник её вставит
@@ -1637,12 +1657,17 @@ generateBtn.addEventListener("click", () => {
   resultBox.textContent = row.url;
   resultBox.className = "result-box";
   resultStatus.textContent = RESOURCES[row.resource] + " · " + SECTIONS[row.section] +
-    " · " + row.locale.toUpperCase() + (row.direct ? " · прямая" : "");
+    " · " + row.locale.toUpperCase() +
+    (row.direct ? " · прямая" : (row.universalFor ? " · универсальная" : ""));
   copyBtn.disabled = false;
   copyBtn.classList.remove("copied");
   copyLabel.textContent = "Скопировать";
 
   const notes = [];
+  if(row.universalFor){
+    notes.push("Специальной ссылки для «" + PLACEMENTS[row.universalFor] +
+               "» нет — это универсальная ссылка, её можно использовать и здесь.");
+  }
   if(row.direct){
     notes.push("Это прямая ссылка: на локали " + row.locale.toUpperCase() +
                " сайт не блокируется, редирект не нужен.");
@@ -1705,6 +1730,7 @@ const reqLocale     = document.getElementById("reqLocale");
 const reqPlacement  = document.getElementById("reqPlacement");
 const reqTarget     = document.getElementById("reqTarget");
 const reqRedirect   = document.getElementById("reqRedirect");
+const reqDomainHint = document.getElementById("reqDomainHint");
 const reqResourceHint = document.getElementById("reqResourceHint");
 const reqSuggest    = document.getElementById("reqSuggest");
 const reqCheck      = document.getElementById("reqCheck");
@@ -1882,7 +1908,13 @@ function slugFromSection(sectionKey, resource){
 }
 
 function buildRedirect(sectionKey){
-  const domain = domainFor(reqPlacement.value, reqResource.value);
+  // своего домена под задачу нет — собираем на универсальном
+  let domain = domainFor(reqPlacement.value, reqResource.value);
+  let viaUniversal = false;
+  if(!domain && reqPlacement.value !== UNIVERSAL_PLACEMENT){
+    domain = domainFor(UNIVERSAL_PLACEMENT, reqResource.value);
+    viaUniversal = !!domain;
+  }
   if(!domain){
     return { url: "", reason: "Для сочетания «" + RESOURCES[reqResource.value] + "» и «" +
       PLACEMENTS[reqPlacement.value] + "» редиректных ссылок в справочнике нет — " +
@@ -1897,13 +1929,36 @@ function buildRedirect(sectionKey){
   if(!slug){
     if(isHome && target){
       return { url: "https://" + domain + "/" +
-        (reqResource.value === "lk" ? "my" + reqLocale.value : reqLocale.value), reason: "" };
+        (reqResource.value === "lk" ? "my" + reqLocale.value : reqLocale.value), reason: "",
+        universal: viaUniversal };
     }
     return { url: "", reason: "Укажите целевую страницу — ссылка соберётся сама" };
   }
 
   return { url: "https://" + domain + "/" + reqLocale.value + "-" +
-    (reqResource.value === "lk" ? "my" : "") + slug, reason: "" };
+    (reqResource.value === "lk" ? "my" : "") + slug, reason: "", universal: viaUniversal };
+}
+
+// ссылка с иконкой копирования для блока проверки в заявке
+function copyLinkHtml(url){
+  return '<span class="check-link">' + url +
+    '<button type="button" class="copy-inline" data-url="' + url + '" ' +
+    'aria-label="Скопировать ссылку" title="Скопировать ссылку">' +
+      '<svg class="icon-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
+      '<svg class="icon-done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>' +
+    '</button></span>';
+}
+
+// универсальная ссылка на тот же раздел, ресурс и локаль
+function findUniversalForRequest(){
+  const sectionKey = resolveSection(reqSection.value).key;
+  if(!sectionKey || reqPlacement.value === UNIVERSAL_PLACEMENT) return null;
+  return ROWS.find(row =>
+    row.resource === reqResource.value &&
+    row.section === sectionKey &&
+    row.locale === reqLocale.value &&
+    row.placement === UNIVERSAL_PLACEMENT
+  );
 }
 
 function findExact(){
@@ -1950,6 +2005,7 @@ function updateRequest(){
 
   // теперь, когда ресурс уточнён, ищем готовую ссылку
   const exact = findExact();
+  const universal = exact ? null : findUniversalForRequest();
 
   // варианты под полем — когда написали не слово в слово
   if(!guess.exact && guess.candidates.length){
@@ -1973,12 +2029,12 @@ function updateRequest(){
   if(exact){
     reqCheck.className = "check found";
     reqCheck.innerHTML = understood + "<b>Такая ссылка уже есть.</b> Заявка не нужна — скопируйте её:" +
-      '<span class="check-link">' + exact.url +
-        '<button type="button" class="copy-inline" data-url="' + exact.url + '" ' +
-        'aria-label="Скопировать ссылку" title="Скопировать ссылку">' +
-          '<svg class="icon-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
-          '<svg class="icon-done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>' +
-        "</button></span>";
+      copyLinkHtml(exact.url);
+  }else if(universal){
+    reqCheck.className = "check found";
+    reqCheck.innerHTML = understood + "<b>Специальной ссылки нет, но есть универсальная.</b> " +
+      "Её можно использовать и для «" + PLACEMENTS[reqPlacement.value] + "» — заявка не обязательна:" +
+      copyLinkHtml(universal.url);
   }else{
     const groups = sectionKey ? describeSection(sectionKey) : [];
     if(groups.length){
@@ -1997,6 +2053,14 @@ function updateRequest(){
 
   const built = buildRedirect(sectionKey);
   const redirect = built.url;
+
+  if(redirect && built.universal){
+    reqDomainHint.textContent = "Своего домена для «" + PLACEMENTS[reqPlacement.value] + "» у ресурса «" +
+      RESOURCES[reqResource.value] + "» нет — ссылка собрана на универсальном домене.";
+    reqDomainHint.classList.remove("hidden");
+  }else{
+    reqDomainHint.classList.add("hidden");
+  }
   if(redirect){
     reqRedirect.className = "rule-box";
     reqRedirect.textContent = redirect;

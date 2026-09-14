@@ -1752,10 +1752,6 @@ generateBtn.addEventListener("click", () => {
   copyLabel.textContent = "Скопировать";
 
   const notes = [];
-  if(row.generated){
-    notes.push("Этой ссылки нет в таблице: она собрана по правилу «домен задачи + путь страницы» " +
-               "и проверена " + VERIFIED_DATE + " — ведёт на ту же страницу, что и ссылка из таблицы.");
-  }
   if(row.direct){
     notes.push("Это прямая ссылка: на локали " + row.locale.toUpperCase() +
                " сайт не блокируется, редирект не нужен.");
